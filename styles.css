@@ -14,10 +14,8 @@ body {
   height: 100vh;
   color: #2d3748;
   position: relative;
-  overflow: auto; /* السماح بالتمرير عند الحاجة */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden; /* منع التمرير في الجسم */
+  display: block; /* تغيير من flex */
   margin: 0;
   padding: 0;
 }
@@ -123,14 +121,12 @@ nav a:hover {
 
 main {
   width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 100vh; /* ارتفاع كامل */
+  display: block; /* تغيير من flex */
   position: relative;
-  padding: 1rem; /* تقليل المساحة الجانبية */
+  padding: 0; /* إزالة المساحة الجانبية */
   box-sizing: border-box;
-  min-height: 100vh; /* ضمان الارتفاع الكامل */
+  margin: 0;
 }
 
 .welcome-section {
@@ -431,45 +427,58 @@ main {
 /* أنماط صفحة الدفعات المالية */
 .form-container {
   background: rgba(255, 255, 255, 0.98);
-  padding: 2rem 1.5rem; /* تقليل المساحة الداخلية */
-  border-radius: 30px;
-  box-shadow: 
-    0 20px 60px rgba(216, 19, 137, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 0 0 1px rgba(216, 19, 137, 0.1);
+  padding: 2rem; /* تقليل المساحة الداخلية */
+  border-radius: 0; /* إزالة الحواف المستديرة لملء الشاشة */
+  box-shadow: none; /* إزالة الظلال */
   backdrop-filter: blur(25px);
-  border: 2px solid rgba(255, 182, 187, 0.3);
-  max-width: 500px;
-  width: 90%; /* عرض متجاوب */
-  margin: 0 auto; /* توسيط أفقي */
-  max-height: 85vh; /* تقليل الارتفاع الأقصى */
-  overflow-y: auto;
-  position: relative;
+  border: none; /* إزالة الحدود */
+  width: 100vw; /* عرض كامل للشاشة */
+  height: 100vh; /* ارتفاع كامل للشاشة */
+  margin: 0; /* إزالة المارجن */
+  position: fixed; /* تثبيت الحاوية */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto; /* تمرير عمودي عند الحاجة */
+  box-sizing: border-box;
+  z-index: 1000; /* جعلها فوق كل شيء */
 }
 
-/* أزرار التنقل الصغيرة */
+/* إزالة تأثير دخول النموذج */
+/* تم إزالة @keyframes formSlideIn للحصول على عرض فوري */
+
+/* إزالة تأثيرات الخلفية المتحركة للنموذج */
+/* .form-container::before تم إزالتها لتحسين الأداء */
+
+/* إزالة تأثير الدخول المتحرك */
+/* @keyframes formSlideIn تم إزالتها */
+
+/* @keyframes formRotate تم إزالتها */
+
+/* إخفاء أزرار التنقل الصغيرة */
 .small-nav-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 2rem;
-  flex-wrap: wrap;
+  display: none; /* إخفاء الأزرار نهائياً */
 }
 
 .btn-small {
   background: linear-gradient(135deg, #da198c 0%, #d81389 50%, #da198c 100%);
   color: white;
-  padding: 0.7rem 1.2rem;
-  border-radius: 30px;
+  padding: 1.3rem 0.8rem;
+  border-radius: 12px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(218, 25, 140, 0.3);
   border: none;
   cursor: pointer;
   text-align: center;
-  min-width: 110px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
@@ -479,9 +488,9 @@ main {
   background: linear-gradient(135deg, #b5166f 0%, #da198c 50%, #d81389 100%);
 }
 
+/* إخفاء عنوان النموذج */
 .form-header {
-  text-align: center;
-  margin-bottom: 2rem;
+  display: none; /* إخفاء العنوان والشعار */
 }
 
 .form-logo {
@@ -512,26 +521,50 @@ main {
 .form-group {
   display: flex;
   flex-direction: column;
+  margin-bottom: 1rem; /* زيادة المسافة بين المجموعات */
 }
 
 .form-group label {
   color: #d81389;
-  font-weight: 600;
-  margin-bottom: 0.3rem;
-  font-size: 1rem;
+  font-weight: 700; /* جعل الخط أكثر سمكاً */
+  margin-bottom: 0.5rem; /* زيادة المسافة تحت التسمية */
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(216, 19, 137, 0.1); /* إضافة ظل خفيف */
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 0.8rem;
+  padding: 1rem 1.2rem; /* زيادة المساحة الداخلية */
   border: 2px solid rgba(255, 182, 187, 0.5);
-  border-radius: 12px;
+  border-radius: 15px; /* حواف أكثر استدارة */
   font-family: 'Cairo', sans-serif;
-  font-size: 0.95rem;
-  background: rgba(255, 255, 255, 0.9);
+  font-size: 1rem; /* زيادة حجم الخط */
+  background: rgba(255, 255, 255, 0.95);
   transition: all 0.3s ease;
   direction: rtl;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-height: 50px; /* زيادة الارتفاع الأدنى */
+  box-shadow: 0 2px 10px rgba(216, 19, 137, 0.1); /* إضافة ظل خفيف */
+}
+
+.form-group textarea {
+  white-space: normal; /* السماح بكسر الأسطر في الملاحظات */
+  resize: vertical;
+}
+
+.form-group select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d81389' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: left 10px center;
+  background-size: 16px;
+  padding-left: 35px;
 }
 
 .form-group input:focus,
@@ -539,8 +572,11 @@ main {
 .form-group textarea:focus {
   outline: none;
   border-color: #d81389;
-  box-shadow: 0 0 0 3px rgba(216, 19, 137, 0.1);
+  box-shadow: 
+    0 0 0 4px rgba(216, 19, 137, 0.15),
+    0 4px 20px rgba(216, 19, 137, 0.2); /* ظل أكثر وضوحاً عند التركيز */
   background: white;
+  transform: translateY(-1px); /* رفع خفيف عند التركيز */
 }
 
 /* تحسين مظهر الحقول */
@@ -562,26 +598,48 @@ main {
 .btn-submit {
   background: linear-gradient(135deg, #da198c 0%, #d81389 50%, #da198c 100%);
   color: white;
-  padding: 1rem 1.8rem;
+  padding: 1.2rem 2rem; /* زيادة المساحة الداخلية */
   border: none;
-  border-radius: 40px;
+  border-radius: 25px; /* حواف أكثر استدارة */
   font-family: 'Cairo', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.2rem; /* زيادة حجم الخط */
   font-weight: 700;
   cursor: pointer;
   transition: all 0.4s ease;
-  box-shadow: 0 10px 30px rgba(218, 25, 140, 0.4);
+  box-shadow: 
+    0 15px 40px rgba(218, 25, 140, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin: 1rem auto; /* توسيط الزر */
-  width: 90%; /* تقليل العرض قليلاً */
-  display: block; /* لضمان التوسيط */
+  margin: 2rem auto; /* زيادة المسافة العلوية والسفلية */
+  width: 100%;
+  display: block;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-submit:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 15px 40px rgba(218, 25, 140, 0.6);
+  transform: translateY(-4px) scale(1.03); /* تأثير أكثر وضوحاً */
+  box-shadow: 
+    0 20px 50px rgba(218, 25, 140, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
   background: linear-gradient(135deg, #b5166f 0%, #da198c 50%, #d81389 100%);
+}
+
+/* إضافة تأثير الضوء المتحرك للزر */
+.btn-submit::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
+}
+
+.btn-submit:hover::before {
+  left: 100%;
 }
 
 .whatsapp-link {
@@ -655,176 +713,238 @@ footer {
 
 /* تحسينات للشاشات الصغيرة (الجوالات) */
 @media (max-width: 480px) {
-  .welcome-section {
-    padding: 1.5rem 1rem 3rem 1rem; /* زيادة المساحة السفلية أكثر */
-    margin: 0.5rem 0.5rem 2.5rem 0.5rem; /* زيادة المارجن السفلي */
-    max-height: 70vh; /* تقليل الارتفاع الأقصى أكثر */
-    position: relative;
-    top: 0; /* إزالة الرفع لضمان التوسيط */
-  }
-  
-  .logo-section {
-    margin-bottom: 1.5rem;
-  }
-  
-  .logo-section h2 {
-    font-size: 2rem;
-    margin-bottom: 3rem; /* مسافة أكبر للجوالات */
-  }
-  
-  .main-logo {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 1rem;
-  }
-  
-  .buttons-container {
-    gap: 1.8rem; /* مسافة أكبر بين الأزرار */
-    margin-bottom: 3rem; /* مسافة سفلية أكبر */
-  }
-  
-  .btn-primary, .btn-secondary {
-    padding: 1.4rem 2rem;
-    font-size: 1.1rem;
-    min-width: 250px;
-    border-radius: 35px; /* حواف أكثر استدارة */
-  }
-  
-  main {
-    padding: 1rem; /* زيادة المساحة الجانبية */
-    align-items: center; /* توسيط عمودي */
-    justify-content: center; /* توسيط أفقي */
-    padding-top: 0; /* إزالة المساحة العلوية الإضافية */
-    display: flex;
-    min-height: 100vh;
-  }
-  
   body {
-    height: 100vh; /* استعادة الارتفاع الكامل */
-    align-items: center; /* توسيط في الوسط */
-    justify-content: center;
-    padding-top: 0; /* إزالة المساحة العلوية الإضافية */
-    overflow: auto; /* السماح بالتمرير عند الحاجة */
+    padding: 0;
+    overflow: hidden;
   }
   
   .form-container {
-    margin: 1rem auto; /* توسيط تلقائي */
-    padding: 1rem 1rem 1.5rem 1rem; /* تقليل المساحة السفلية */
-    max-height: 80vh; /* تقليل الارتفاع لضمان الظهور في الوسط */
+    padding: 1rem; /* مساحة مناسبة للجوال */
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
     overflow-y: auto;
-    border-radius: 20px;
-    position: relative;
-    top: 0; /* إزالة الرفع للتوسيط الطبيعي */
-    transform: translateY(0); /* توسيط إضافي */
   }
   
   .form-group {
-    margin-bottom: 0.4rem; /* تقليل المسافة بين الحقول */
+    margin-bottom: 1rem;
   }
   
   .form-group input,
   .form-group select,
   .form-group textarea {
-    min-height: 48px; /* تقليل الارتفاع قليلاً */
-    padding: 12px 18px;
+    height: 55px;
+    padding: 12px 16px;
     font-size: 16px;
     border-radius: 10px;
+    line-height: 1.3;
+  }
+  
+  .form-group textarea {
+    height: 80px;
+    resize: vertical;
   }
   
   .form-group label {
-    font-size: 1.1rem;
-    margin-bottom: 0.2rem; /* تقليل المسافة تحت التسمية */
-    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    display: block;
   }
   
   .btn-submit {
-    min-height: 48px; /* تقليل الارتفاع قليلاً */
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    margin: 1rem auto 1.5rem auto; /* توسيط الزر وتقليل المسافات */
-    width: 90%; /* تقليل العرض قليلاً */
-    display: block; /* لضمان التوسيط */
+    height: 55px;
+    font-size: 1.3rem;
+    margin: 1.5rem auto;
+    width: 100%;
+    border-radius: 15px;
   }
   
-  .small-nav-buttons {
-    margin-top: 1rem; /* تقليل المسافة العلوية */
-    margin-bottom: 1.5rem; /* تقليل المسافة السفلية */
-    flex-direction: row;
-    gap: 0.8rem;
-    justify-content: center;
-  }
-  
-  .btn-small {
-    padding: 0.8rem 1rem;
-    font-size: 0.85rem;
-    min-width: 120px;
-  }
-  
-  /* إخفاء الفوتر في الجوال */
+  /* إخفاء العناصر غير المرغوبة */
+  .small-nav-buttons,
+  .form-header,
   footer {
     display: none;
+  }
+  
+  main {
+    padding: 0;
+    height: 100vh;
   }
 }
 
 /* تحسينات للشاشات المتوسطة (التابلت) */
 @media (min-width: 481px) and (max-width: 768px) {
+  body {
+    padding: 0;
+    overflow: hidden;
+  }
+  
   .form-container {
-    margin: 1rem;
-    padding: 1.5rem;
-    max-width: 90vw;
-    max-height: 90vh;
+    padding: 1.5rem; /* مساحة مناسبة للتابلت */
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
     overflow-y: auto;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
   }
   
   .form-group input,
   .form-group select,
   .form-group textarea {
-    min-height: 48px;
-    padding: 12px 16px;
+    height: 50px;
+    padding: 14px 18px;
     font-size: 16px;
+    border-radius: 12px;
+  }
+  
+  .form-group textarea {
+    height: 90px;
+    resize: vertical;
   }
   
   .form-group label {
-    font-size: 1.05rem;
-    margin-bottom: 0.3rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .btn-submit {
+    height: 50px;
+    font-size: 1.2rem;
+    margin: 2rem auto;
+    width: 100%;
+    border-radius: 12px;
+  }
+  
+  /* إخفاء العناصر غير المرغوبة */
+  .small-nav-buttons,
+  .form-header,
+  footer {
+    display: none;
   }
 }
 
 /* تحسينات للشاشات الكبيرة (التابلت الكبير واللابتوب) */
 @media (min-width: 769px) {
+  body {
+    padding: 0;
+    overflow: hidden;
+  }
+  
   .form-container {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 2rem;
+    padding: 2rem; /* مساحة مناسبة للشاشات الكبيرة */
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+  
+  .form-group {
+    margin-bottom: 1.2rem;
   }
   
   .form-group input,
   .form-group select,
   .form-group textarea {
-    min-height: 46px;
+    height: 48px;
     padding: 12px 16px;
     font-size: 15px;
+    border-radius: 10px;
+  }
+  
+  .form-group textarea {
+    height: 100px;
+    resize: vertical;
   }
   
   .form-group label {
     font-size: 1rem;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .btn-submit {
+    height: 48px;
+    font-size: 1.1rem;
+    margin: 2rem auto;
+    width: 100%;
+    border-radius: 10px;
+  }
+  
+  /* إخفاء العناصر غير المرغوبة */
+  .small-nav-buttons,
+  .form-header,
+  footer {
+    display: none;
   }
 }
 
 /* تحسينات للشاشات الكبيرة جداً */
 @media (min-width: 1200px) {
   .form-container {
-    max-width: 650px;
-    padding: 2.5rem;
+    padding: 3rem; /* مساحة أكبر للشاشات الكبيرة جداً */
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
   }
   
   .form-group input,
   .form-group select,
   .form-group textarea {
-    min-height: 48px;
+    height: 50px;
     padding: 14px 18px;
     font-size: 16px;
+    border-radius: 12px;
+  }
+  
+  .form-group textarea {
+    height: 110px;
+    resize: vertical;
+  }
+  
+  .form-group label {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+  
+  .btn-submit {
+    height: 52px;
+    font-size: 1.2rem;
+    margin: 2.5rem auto;
+    width: 100%;
+    border-radius: 12px;
+  }
+  
+  /* إخفاء العناصر غير المرغوبة */
+  .small-nav-buttons,
+  .form-header,
+  footer {
+    display: none;
   }
 }
 
