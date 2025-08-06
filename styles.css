@@ -14,7 +14,7 @@ body {
   height: 100vh;
   color: #2d3748;
   position: relative;
-  overflow: hidden;
+  overflow: auto; /* السماح بالتمرير عند الحاجة */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,8 +128,9 @@ main {
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 2rem;
+  padding: 1rem; /* تقليل المساحة الجانبية */
   box-sizing: border-box;
+  min-height: 100vh; /* ضمان الارتفاع الكامل */
 }
 
 .welcome-section {
@@ -430,7 +431,7 @@ main {
 /* أنماط صفحة الدفعات المالية */
 .form-container {
   background: rgba(255, 255, 255, 0.98);
-  padding: 2.5rem 2rem;
+  padding: 2rem 1.5rem; /* تقليل المساحة الداخلية */
   border-radius: 30px;
   box-shadow: 
     0 20px 60px rgba(216, 19, 137, 0.3),
@@ -439,9 +440,11 @@ main {
   backdrop-filter: blur(25px);
   border: 2px solid rgba(255, 182, 187, 0.3);
   max-width: 500px;
-  margin: 0 auto;
-  max-height: 90vh;
+  width: 90%; /* عرض متجاوب */
+  margin: 0 auto; /* توسيط أفقي */
+  max-height: 85vh; /* تقليل الارتفاع الأقصى */
   overflow-y: auto;
+  position: relative;
 }
 
 /* أزرار التنقل الصغيرة */
@@ -503,7 +506,7 @@ main {
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.2rem; /* تقليل المسافة بين العناصر */
 }
 
 .form-group {
@@ -514,7 +517,7 @@ main {
 .form-group label {
   color: #d81389;
   font-weight: 600;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
   font-size: 1rem;
 }
 
@@ -559,7 +562,7 @@ main {
 .btn-submit {
   background: linear-gradient(135deg, #da198c 0%, #d81389 50%, #da198c 100%);
   color: white;
-  padding: 1.2rem 1.8rem;
+  padding: 1rem 1.8rem;
   border: none;
   border-radius: 40px;
   font-family: 'Cairo', sans-serif;
@@ -570,6 +573,9 @@ main {
   box-shadow: 0 10px 30px rgba(218, 25, 140, 0.4);
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin: 1rem auto; /* توسيط الزر */
+  width: 90%; /* تقليل العرض قليلاً */
+  display: block; /* لضمان التوسيط */
 }
 
 .btn-submit:hover {
@@ -626,14 +632,212 @@ footer {
   z-index: 1000;
 }
 
+/* تحسين الحقول للاستجابة لجميع الشاشات */
+.form-group {
+  margin-bottom: 0.4rem; /* تقليل المسافة */
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  min-height: 48px; /* الحد الأدنى للارتفاع لسهولة اللمس */
+  padding: 12px 16px;
+  font-size: 16px; /* يمنع التكبير التلقائي في iOS */
+  border: 2px solid rgba(255, 182, 187, 0.5);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  -webkit-appearance: none; /* إزالة التنسيق الافتراضي في Safari */
+  appearance: none;
+}
+
+/* تحسينات للشاشات الصغيرة (الجوالات) */
+@media (max-width: 480px) {
+  .welcome-section {
+    padding: 1.5rem 1rem 3rem 1rem; /* زيادة المساحة السفلية أكثر */
+    margin: 0.5rem 0.5rem 2.5rem 0.5rem; /* زيادة المارجن السفلي */
+    max-height: 70vh; /* تقليل الارتفاع الأقصى أكثر */
+    position: relative;
+    top: 0; /* إزالة الرفع لضمان التوسيط */
+  }
+  
+  .logo-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .logo-section h2 {
+    font-size: 2rem;
+    margin-bottom: 3rem; /* مسافة أكبر للجوالات */
+  }
+  
+  .main-logo {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1rem;
+  }
+  
+  .buttons-container {
+    gap: 1.8rem; /* مسافة أكبر بين الأزرار */
+    margin-bottom: 3rem; /* مسافة سفلية أكبر */
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 1.4rem 2rem;
+    font-size: 1.1rem;
+    min-width: 250px;
+    border-radius: 35px; /* حواف أكثر استدارة */
+  }
+  
+  main {
+    padding: 1rem; /* زيادة المساحة الجانبية */
+    align-items: center; /* توسيط عمودي */
+    justify-content: center; /* توسيط أفقي */
+    padding-top: 0; /* إزالة المساحة العلوية الإضافية */
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  body {
+    height: 100vh; /* استعادة الارتفاع الكامل */
+    align-items: center; /* توسيط في الوسط */
+    justify-content: center;
+    padding-top: 0; /* إزالة المساحة العلوية الإضافية */
+    overflow: auto; /* السماح بالتمرير عند الحاجة */
+  }
+  
+  .form-container {
+    margin: 1rem auto; /* توسيط تلقائي */
+    padding: 1rem 1rem 1.5rem 1rem; /* تقليل المساحة السفلية */
+    max-height: 80vh; /* تقليل الارتفاع لضمان الظهور في الوسط */
+    overflow-y: auto;
+    border-radius: 20px;
+    position: relative;
+    top: 0; /* إزالة الرفع للتوسيط الطبيعي */
+    transform: translateY(0); /* توسيط إضافي */
+  }
+  
+  .form-group {
+    margin-bottom: 0.4rem; /* تقليل المسافة بين الحقول */
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 48px; /* تقليل الارتفاع قليلاً */
+    padding: 12px 18px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+  
+  .form-group label {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem; /* تقليل المسافة تحت التسمية */
+    font-weight: 600;
+  }
+  
+  .btn-submit {
+    min-height: 48px; /* تقليل الارتفاع قليلاً */
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    margin: 1rem auto 1.5rem auto; /* توسيط الزر وتقليل المسافات */
+    width: 90%; /* تقليل العرض قليلاً */
+    display: block; /* لضمان التوسيط */
+  }
+  
+  .small-nav-buttons {
+    margin-top: 1rem; /* تقليل المسافة العلوية */
+    margin-bottom: 1.5rem; /* تقليل المسافة السفلية */
+    flex-direction: row;
+    gap: 0.8rem;
+    justify-content: center;
+  }
+  
+  .btn-small {
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+    min-width: 120px;
+  }
+  
+  /* إخفاء الفوتر في الجوال */
+  footer {
+    display: none;
+  }
+}
+
+/* تحسينات للشاشات المتوسطة (التابلت) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .form-container {
+    margin: 1rem;
+    padding: 1.5rem;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+  
+  .form-group label {
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+  }
+}
+
+/* تحسينات للشاشات الكبيرة (التابلت الكبير واللابتوب) */
+@media (min-width: 769px) {
+  .form-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 46px;
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  
+  .form-group label {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+}
+
+/* تحسينات للشاشات الكبيرة جداً */
+@media (min-width: 1200px) {
+  .form-container {
+    max-width: 650px;
+    padding: 2.5rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 48px;
+    padding: 14px 18px;
+    font-size: 16px;
+  }
+}
+
 /* تحسينات للشاشات الصغيرة */
 @media (max-width: 768px) {
   .welcome-section {
-    padding: 2rem 1.5rem;
+    padding: 2rem 1.5rem; /* تقليل المساحة السفلية */
     border-radius: 25px;
-    margin: 1rem;
+    margin: 1rem; /* توسيط بسيط */
     max-width: 95vw;
-    max-height: 85vh;
+    max-height: 85vh; /* تقليل الارتفاع */
+    position: relative;
+    top: 0; /* إزالة الرفع للتوسيط الطبيعي */
   }
   
   .main-logo {
@@ -644,30 +848,36 @@ footer {
   
   .logo-section h2 {
     font-size: 2.2rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem; /* تقليل المسافة */
   }
   
   .buttons-container {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1rem; /* تقليل المسافة بين الأزرار */
     align-items: center;
+    margin-bottom: 1rem; /* تقليل المسافة السفلية */
   }
   
   .btn-primary, .btn-secondary {
-    padding: 1rem 2rem;
-    font-size: 1rem;
-    min-width: 200px;
+    padding: 1.2rem 2.5rem; /* زيادة حجم الأزرار قليلاً */
+    font-size: 1.1rem;
+    min-width: 220px; /* توسيع الأزرار */
   }
   
   main {
-    padding: 1rem;
+    padding: 1rem; /* مساحة جانبية مناسبة */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
   }
   
   .form-container {
-    margin: 1rem;
-    padding: 1.2rem;
-    max-height: 85vh;
+    margin: 1rem auto; /* توسيط أفقي */
+    padding: 1.5rem; /* مساحة داخلية مناسبة */
+    max-height: 80vh; /* ارتفاع مناسب */
     overflow-y: auto;
+    width: 90%; /* عرض متجاوب */
   }
   
   .form-header h2 {

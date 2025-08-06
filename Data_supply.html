@@ -1,10 +1,318 @@
 <!DOCTYPE html>
-<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>صفحة التوريد - دونات وحشوة</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* تحسينات إضافية للاستجابة */
+    .form-container {
+      width: 100%;
+      max-width: 750px; /* تكبير الحاوية */
+      margin: 1rem auto;
+      padding: 2rem; /* زيادة المساحة الداخلية */
+      box-sizing: border-box;
+    }
+    
+    /* تحسين الحقول للجوالات */
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+        align-items: flex-start;
+        padding-top: 2rem; /* زيادة المسافة العلوية */
+      }
+      
+      .form-container {
+        margin: 0.3rem 0.3rem 2rem 0.3rem; /* تقليل المارجن السفلي */
+        padding: 0.5rem 1rem 0.5rem 1rem; /* تقليل المساحة السفلية */
+        max-height: calc(100vh - 1rem); /* زيادة المساحة المتاحة */
+        overflow-y: auto;
+        width: calc(100% - 1rem);
+        position: relative;
+        top: 0.3cm; /* رفع الحاوية أكثر */
+      }
+      
+      .form-group {
+        margin-bottom: 0.1rem; /* تقليل المسافة بين الحقول */
+      }
+      
+      .form-group:first-of-type {
+        margin-top: -1rem; /* تقليل المسافة من الأعلى للحقل الأول */
+      }
+      
+      .form-group input,
+      .form-group select {
+        height: 55px; /* تكبير ارتفاع الحقول */
+        padding: 12px 16px; /* زيادة المساحة الداخلية */
+        font-size: 16px; /* تكبير الخط */
+        border-radius: 10px;
+        line-height: 1.3;
+      }
+      
+      .form-group label {
+        font-size: 1.2rem; /* تكبير خط التسميات */
+        margin-bottom: 0.3rem;
+        display: block;
+      }
+      
+      .btn-submit {
+        height: 55px; /* تكبير ارتفاع الزر */
+        font-size: 1.3rem; /* تكبير خط الزر */
+        margin: 1.2rem auto;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1;
+        border: none;
+        border-radius: 15px;
+      }
+      
+      .small-nav-buttons {
+        margin-top: 0.3rem; /* زيادة المسافة العلوية */
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center; /* توسيط أفقي */
+        align-items: center; /* توسيط عمودي */
+      }
+      
+      .btn-small {
+        flex: 1;
+        padding: 1.3rem 0.8rem; /* تكبير المساحة الداخلية */
+        font-size: 1.1rem; /* تكبير خط الأزرار */
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+        border-radius: 12px; /* تحسين الحواف */
+        text-decoration: none;
+      }
+      
+      /* إخفاء الفوتر في الجوال */
+      footer {
+        display: none;
+      }
+    }
+    
+    /* تحسين للتابلت */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .form-container {
+        max-width: 90%; /* تكبير العرض */
+        padding: 1.5rem; /* زيادة المساحة الداخلية */
+        margin: 0.3rem auto;
+      }
+      
+      .form-group {
+        margin-bottom: 0.6rem; /* زيادة المسافة بين الحقول */
+      }
+      
+      .form-group:first-of-type {
+        margin-top: -0.8rem;
+      }
+      
+      .form-group input,
+      .form-group select {
+        height: 55px; /* تكبير ارتفاع الحقول */
+        padding: 12px 16px; /* زيادة المساحة الداخلية */
+        font-size: 18px; /* تكبير حجم الخط أكثر */
+        line-height: 1.3;
+        border-radius: 12px;
+      }
+      
+      .form-group label {
+        font-size: 1.4rem; /* تكبير حجم خط التسميات */
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+      }
+      
+      .btn-submit {
+        height: 55px; /* تكبير ارتفاع الزر */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: 1.2rem auto;
+        font-size: 1.2rem; /* تكبير حجم الخط */
+        border-radius: 15px;
+        font-weight: 600;
+      }
+      
+      .btn-small {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.2rem 1.3rem; /* تكبير المساحة الداخلية */
+        font-size: 1.1rem; /* تكبير الخط */
+        border-radius: 12px;
+        font-weight: 500;
+      }
+      
+      .small-nav-buttons {
+        margin-top: 0.2rem; /* تقليل المسافة العلوية */
+        margin-bottom: 0.2rem; /* تقليل المسافة السفلية */
+        gap: 0.3rem; /* تقليل المسافة بين الأزرار */
+      }
+      
+      /* تحسين رأس النموذج للتابلت */
+      .form-header h2 {
+        margin-bottom: 0.2rem; /* تقليل المسافة تحت العنوان */
+        font-size: 1.3rem;
+      }
+      
+      .form-logo {
+        width: 60px; /* تقليل حجم الشعار */
+        height: 60px;
+        margin-bottom: 0.3rem;
+      }
+    }
+    
+    /* تحسين للشاشات الكبيرة والآي باد برو */
+    @media (min-width: 769px) {
+      .form-container {
+        max-width: 850px; /* تكبير العرض أكثر */
+        padding: 2.5rem; /* زيادة المساحة الداخلية */
+        margin: 1rem auto;
+      }
+      
+      .form-group {
+        margin-bottom: 1.5rem; /* زيادة المسافة بين الحقول */
+      }
+      
+      .form-group:first-of-type {
+        margin-top: 0.5rem;
+      }
+      
+      .form-group input,
+      .form-group select {
+        height: 65px; /* تكبير ارتفاع الحقول أكثر */
+        padding: 18px 25px; /* زيادة المساحة الداخلية */
+        font-size: 20px; /* تكبير الخط أكثر */
+        line-height: 1.4;
+        border-radius: 15px;
+      }
+      
+      .form-group label {
+        font-size: 1.6rem; /* تكبير خط التسميات أكثر */
+        margin-bottom: 0.6rem;
+        font-weight: 600;
+      }
+      
+      .btn-submit {
+        height: 70px; /* تكبير ارتفاع الزر أكثر */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: 2.5rem auto;
+        font-size: 1.5rem; /* تكبير خط الزر أكثر */
+        border-radius: 18px;
+        font-weight: 600;
+      }
+      
+      .btn-small {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 2rem; /* تكبير المساحة الداخلية أكثر */
+        font-size: 1.3rem; /* تكبير خط الأزرار الصغيرة */
+        border-radius: 15px;
+        font-weight: 500;
+      }
+      
+      .small-nav-buttons {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        gap: 1rem; /* زيادة المسافة بين الأزرار */
+      }
+      
+      /* تحسين رأس النموذج للشاشات الكبيرة */
+      .form-header h2 {
+        margin-bottom: 1rem;
+        font-size: 1.8rem; /* تكبير العنوان */
+      }
+      
+      .form-logo {
+        width: 80px; /* تكبير حجم الشعار */
+        height: 80px;
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    /* تحسين خاص للآي باد برو والشاشات الكبيرة جداً */
+    @media (min-width: 1024px) {
+      .form-container {
+        max-width: 950px; /* عرض أكبر للشاشات الكبيرة */
+        padding: 3.5rem; /* زيادة المساحة الداخلية */
+      }
+      
+      .form-group input,
+      .form-group select {
+        height: 70px; /* ارتفاع أكبر */
+        padding: 20px 30px; /* مساحة داخلية أكبر */
+        font-size: 22px; /* خط أكبر */
+      }
+      
+      .form-group label {
+        font-size: 1.8rem; /* خط أكبر للتسميات */
+        margin-bottom: 1rem;
+      }
+      
+      .btn-submit {
+        height: 75px; /* زر أكبر */
+        font-size: 1.6rem; /* خط أكبر للزر */
+        margin: 3rem auto;
+      }
+      
+      .btn-small {
+        padding: 1.8rem 2.5rem; /* مساحة أكبر */
+        font-size: 1.4rem; /* خط أكبر */
+      }
+      
+      .form-header h2 {
+        font-size: 2.2rem; /* عنوان أكبر */
+        margin-bottom: 2rem;
+      }
+      
+      .form-logo {
+        width: 100px; /* شعار أكبر */
+        height: 100px;
+        margin-bottom: 1.5rem;
+      }
+    }
+    
+    /* تحسين عام للحقول */
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: all 0.3s ease;
+      overflow: hidden; /* منع فيض النص */
+      text-overflow: ellipsis; /* إضافة نقاط عند قص النص */
+      white-space: nowrap; /* منع كسر الأسطر */
+    }
+    
+    .form-group select {
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d81389' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: left 10px center; /* تحسين موضع السهم */
+      background-size: 16px; /* تصغير حجم السهم */
+      padding-left: 35px; /* تقليل المساحة اليسرى */
+    }
+    
+    /* تحسين التركيز */
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #d81389;
+      box-shadow: 0 0 0 3px rgba(216, 19, 137, 0.1);
+      background: white;
+    }
+  </style>
 </head>
 <body>
   <main>
@@ -53,12 +361,12 @@
           </select>
         </div>
 
-        <button type="submit" class="btn-submit">📤 إرسال التوريد</button>
+        <button type="submit" class="btn-submit"> إرسال التوريد</button>
       </form>
 
       <div id="whatsappLink" class="whatsapp-link" style="display: none;">
         <p>تم حفظ البيانات بنجاح! يمكنك الآن إرسال التأكيد عبر واتساب:</p>
-        <a id="whatsappUrl" target="_blank" class="btn-whatsapp">📱 إرسال عبر واتساب</a>
+        <a id="whatsappUrl" target="_blank" class="btn-whatsapp"> إرسال عبر واتساب</a>
       </div>
 
       <!-- أزرار التنقل الصغيرة -->
