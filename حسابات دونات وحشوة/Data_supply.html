@@ -1,379 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>صفحة التوريد - دونات وحشوة</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <main>
-    <div class="form-container">
-      <div class="form-header">
-        <img src="logo-01.png" alt="شعار دونات وحشوة" class="form-logo">
-        <h2>نموذج التوريد</h2>
-      </div>
-      
-      <form id="supplyForm" class="payment-form">
-        <div class="form-group">
-          <label for="customer">اختر العميل:</label>
-          <select id="customer" required>
-            <option value="">اختر العميل...</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="mobile">رقم جوال المستلم (واتس):</label>
-          <input type="tel" id="mobile" pattern="05[0-9]{8}" placeholder="05xxxxxxxx" required>
-        </div>
-
-        <div class="form-group">
-          <label for="date">تاريخ اليوم:</label>
-          <input type="date" id="date" required>
-        </div>
-
-        <div class="form-group">
-          <label for="product">الصنف:</label>
-          <select id="product" required>
-            <option value="">اختر الصنف...</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="qtyIn">كمية التسليم:</label>
-          <select id="qtyIn" required>
-            <option value="">اختر الكمية...</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="qtyOut">كمية المستردة:</label>
-          <select id="qtyOut" required>
-            <option value="">اختر الكمية...</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn-submit">📤 إرسال التوريد</button>
-      </form>
-
-      <div id="whatsappLink" class="whatsapp-link" style="display: none;">
-        <p>تم حفظ البيانات بنجاح! يمكنك الآن إرسال التأكيد عبر واتساب:</p>
-        <a id="whatsappUrl" target="_blank" class="btn-whatsapp">📱 إرسال عبر واتساب</a>
-      </div>
-
-      <!-- أزرار التنقل الصغيرة -->
-      <div class="small-nav-buttons">
-        <a href="index.html" class="btn-small">الرئيسية</a>
-        <a href="pay.html" class="btn-small">الدفعات المالية</a>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 نظام إدارة توريد الدونات والحشوة</p>
-  </footer> 
-  <script>
-    // تعبئة الكمية من 1 إلى 100
-    function fillSelect(id) {
-      const sel = document.getElementById(id);
-      for (let i = 0; i <= 100; i++) {
-        const option = document.createElement('option');
-        option.value = option.textContent = i;
-        sel.appendChild(option);
-      }
-    }
-    fillSelect('qtyIn');
-    fillSelect('qtyOut');
-
-    // جلب بيانات العملاء من Google Sheets
-    function loadCustomers() {
-      const customerSel = document.getElementById('customer');
-      
-      // إضافة خيار فارغ أولاً
-      const emptyOption = document.createElement('option');
-      emptyOption.value = '';
-      emptyOption.textContent = 'اختر العميل';
-      emptyOption.selected = true;
-      customerSel.appendChild(emptyOption);
-      
-      // محاولة جلب البيانات من Google Sheets
-      tryLoadFromGoogleSheets();
-    }
-    
-    // محاولة جلب البيانات من Google Sheets المشارك
-    function tryLoadFromGoogleSheets() {
-      // استخدام رابط CSV مباشر للشيت المشارك
-      const CUSTOMER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1POl2ntUZL9x0n79Wr1_ZswEETSFUrgjMrXcFtDfoFqA/export?format=csv&gid=0';
-      
-      fetch(CUSTOMER_SHEET_URL)
-        .then(res => res.text())
-        .then(csvData => {
-          console.log('تم الاتصال بـ Google Sheets بنجاح');
-          console.log('CSV Data:', csvData.substring(0, 200) + '...'); // عرض أول 200 حرف للتشخيص
-          
-          const lines = csvData.split('\n');
-          const customerSel = document.getElementById('customer');
-          const uniqueCustomers = new Set(); // لتجنب التكرار
-          
-          // معالجة البيانات من CSV
-          lines.forEach((line, index) => {
-            if (index === 0) return; // تخطي الرأس
-            
-            const columns = line.split(',');
-            if (columns.length > 1) {
-              // أخذ العمود الثاني (العمود B) وتنظيفه للعملاء
-              let customer = columns[1];
-              if (customer) {
-                customer = customer.trim().replace(/"/g, '').replace(/'/g, '');
-                
-                if (customer && customer !== '' && customer !== 'undefined') {
-                  uniqueCustomers.add(customer); // إضافة للمجموعة لتجنب التكرار
-                }
-              }
-            }
-          });
-          
-          // مسح القائمة الحالية
-          customerSel.innerHTML = '';
-          
-          // إضافة خيار فارغ أولاً
-          const emptyOption = document.createElement('option');
-          emptyOption.value = '';
-          emptyOption.textContent = 'اختر العميل';
-          emptyOption.selected = true;
-          customerSel.appendChild(emptyOption);
-          
-          // إضافة العملاء الفريدين
-          uniqueCustomers.forEach(customer => {
-            const opt = document.createElement('option');
-            opt.value = customer;
-            opt.textContent = customer;
-            customerSel.appendChild(opt);
-          });
-          
-          console.log('تم تحديث البيانات من Google Sheets:', uniqueCustomers.size, 'عميل فريد');
-          
-          if (customerSel.options.length > 1) {
-            alert('تم تحميل بيانات العملاء الحديثة من Google Sheets بنجاح!');
-          }
-        })
-        .catch(err => {
-          console.error('خطأ في جلب البيانات من Google Sheets:', err);
-          console.log('استخدام البيانات الاحتياطية');
-        });
-    }
-    
-    // تحميل الأصناف من Google Sheets نفس الشيت Customer
-    function loadProducts() {
-      // أصناف احتياطية
-      const backupProducts = ['دونات محشية', 'سينابون', 'كوكيز'];
-      const productSel = document.getElementById('product');
-      
-      // إضافة خيار فارغ أولاً
-      const emptyOption = document.createElement('option');
-      emptyOption.value = '';
-      emptyOption.textContent = 'اختر الصنف';
-      productSel.appendChild(emptyOption);
-      
-      // إضافة الأصناف الاحتياطية أولاً
-      backupProducts.forEach(product => {
-        const opt = document.createElement('option');
-        opt.value = product;
-        opt.textContent = product;
-        productSel.appendChild(opt);
-      });
-      
-      console.log('تم تحميل الأصناف الاحتياطية:', backupProducts.length, 'صنف');
-      
-      // محاولة جلب الأصناف من Google Sheets
-      tryLoadProductsFromGoogleSheets();
-    }
-    
-    // جلب الأصناف من Google Sheets
-    function tryLoadProductsFromGoogleSheets() {
-      // استخدام نفس رابط الشيت Customer
-      const PRODUCTS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1POl2ntUZL9x0n79Wr1_ZswEETSFUrgjMrXcFtDfoFqA/export?format=csv&gid=0';
-      
-      fetch(PRODUCTS_SHEET_URL)
-        .then(res => res.text())
-        .then(csvData => {
-          console.log('تم الاتصال بـ Google Sheets لجلب الأصناف');
-          
-          const lines = csvData.split('\n');
-          const productSel = document.getElementById('product');
-          const uniqueProducts = new Set(); // لتجنب التكرار
-          
-          // معالجة البيانات من CSV - العمود B (مؤشر 1) للأصناف
-          lines.forEach((line, index) => {
-            if (index === 0) return; // تخطي الرأس
-            
-            const columns = line.split(',');
-            if (columns.length > 2) {
-              // أخذ العمود الثالث (العمود C) وتنظيفه للأصناف
-              let product = columns[2];
-              if (product) {
-                product = product.trim().replace(/"/g, '').replace(/'/g, '');
-                
-                if (product && product !== '' && product !== 'undefined') {
-                  uniqueProducts.add(product); // إضافة للمجموعة لتجنب التكرار
-                }
-              }
-            }
-          });
-          
-          // إذا وُجدت أصناف من Google Sheets، استبدل القائمة
-          if (uniqueProducts.size > 0) {
-            // مسح القائمة الحالية
-            productSel.innerHTML = '';
-            
-            // إضافة خيار فارغ أولاً
-            const emptyOption = document.createElement('option');
-            emptyOption.value = '';
-            emptyOption.textContent = 'اختر الصنف';
-            productSel.appendChild(emptyOption);
-            
-            // إضافة الأصناف الفريدة
-            uniqueProducts.forEach(product => {
-              const opt = document.createElement('option');
-              opt.value = product;
-              opt.textContent = product;
-              productSel.appendChild(opt);
-            });
-            
-            console.log('تم تحديث الأصناف من Google Sheets:', uniqueProducts.size, 'صنف فريد');
-            alert('تم تحميل الأصناف من Google Sheets بنجاح!');
-          }
-        })
-        .catch(err => {
-          console.error('خطأ في جلب الأصناف من Google Sheets:', err);
-          console.log('استخدام الأصناف الاحتياطية');
-        });
-    }
-    
-    // استدعاء دوال التحميل
-    loadCustomers();
-    loadProducts();
-    
-    // تعيين تاريخ اليوم تلقائياً
-    document.getElementById('date').valueAsDate = new Date();
-
-    document.getElementById('supplyForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      console.log('تم الضغط على زر الإرسال!');
-      
-      // جمع البيانات
-      const customer = document.getElementById('customer').value;
-      const mobile = document.getElementById('mobile').value;
-      const date = document.getElementById('date').value;
-      const product = document.getElementById('product').value;
-      const qtyIn = document.getElementById('qtyIn').value;
-      const qtyOut = document.getElementById('qtyOut').value;
-
-      console.log('البيانات المدخلة:', { customer, mobile, date, product, qtyIn, qtyOut });
-
-      // التحقق من صحة البيانات
-      if (!customer) {
-        alert('يرجى اختيار العميل');
-        console.log('خطأ: لم يتم اختيار العميل');
-        return;
-      }
-      if (!mobile || !mobile.match(/^05[0-9]{8}$/)) {
-        alert('يرجى إدخال رقم جوال صحيح (يبدأ بـ 05 ويتكون من 10 أرقام)');
-        console.log('خطأ: رقم الجوال غير صحيح:', mobile);
-        return;
-      }
-      if (!date) {
-        alert('يرجى اختيار التاريخ');
-        console.log('خطأ: لم يتم اختيار التاريخ');
-        return;
-      }
-      if (!product) {
-        alert('يرجى اختيار الصنف');
-        console.log('خطأ: لم يتم اختيار الصنف');
-        return;
-      }
-
-      console.log('جميع البيانات صحيحة، سيتم الإرسال...');
-
-      // إرسال البيانات إلى Google Apps Script
-      const data = { 
-        customer: customer,    // العمود B
-        date: date,           // العمود C  
-        qtyIn: qtyIn,         // العمود D
-        qtyOut: qtyOut,       // العمود E
-        product: product,     // العمود F
-        mobile: mobile        // العمود G
-      };
-      console.log('إرسال البيانات:', data);
-
-      // إرسال البيانات إلى Google Sheets أولاً
-      fetch('https://script.google.com/macros/s/AKfycbyvo3ExVKbjmoCw2Nmgywep4IPEgQzl6y7zpt_HMFd8RBpXBRZGIiQ9WC0Nhl78byDS9Q/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-      .then(() => {
-        console.log('تم إرسال البيانات إلى Google Sheets بنجاح');
-        alert('تم تسجيل البيانات بنجاح في Google Sheets!');
-
-        // بعد نجاح التسجيل، توليد رابط واتساب
-        const phone = '966' + mobile.slice(1);
-        const message = `العميل: *${customer}*\n` +
-                        `التاريخ: *${date}*\n` +
-                        `الصنف: *${product}*\n` +
-                        `كمية الإستلام: *${qtyIn}*\n` +
-                        `الكمية المستردة: *${qtyOut}*\n` +
-                        `تم التسجيل في سجلاتنا ... وشكرا لكم`;
-        
-        // استخدام رابط واتساب المحسن
-        const waLink = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-        
-        console.log('فتح رابط واتساب:', waLink);
-        
-        // إظهار رابط واتساب كضمان إضافي
-        // إظهار رابط واتساب
-        const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-        
-        document.getElementById('whatsappUrl').href = whatsappUrl;
-        document.getElementById('whatsappLink').style.display = 'block';
-        
-        // إضافة تأخير صغير قبل فتح واتساب
-        setTimeout(() => {
-          window.open(whatsappUrl, '_blank');
-        }, 500);
-
-        // إعادة تعيين النموذج
-        document.getElementById('supplyForm').reset();
-        document.getElementById('date').valueAsDate = new Date();
-      })
-      .catch(err => {
-        console.error('خطأ في إرسال البيانات:', err);
-        alert('حدث خطأ في تسجيل البيانات. سيتم فتح واتساب على أي حال...');
-        
-        // حتى لو فشل التسجيل، سنفتح واتساب
-        const phone = '966' + mobile.slice(1);
-        const message = `العميل: *${customer}*\n` +
-                        `التاريخ: *${date}*\n` +
-                        `الصنف: *${product}*\n` +
-                        `كمية الإستلام: *${qtyIn}*\n` +
-                        `الكمية المستردة: *${qtyOut}*\n` +
-                        `تم التسجيل في سجلاتنا ... وشكرا لكم`;
-        
-        const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-        
-        document.getElementById('whatsappUrl').href = whatsappUrl;
-        document.getElementById('whatsappLink').style.display = 'block';
-        
-        setTimeout(() => {
-          window.open(whatsappUrl, '_blank');
-        }, 500);
-
-        // إعادة تعيين النموذج
-        document.getElementById('supplyForm').reset();
-        document.getElementById('date').valueAsDate = new Date();
-      });
-    });
-  </script>
-</body>
-</html>
