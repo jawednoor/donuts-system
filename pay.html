@@ -756,9 +756,9 @@
       </form>
 
       <div id="receiptLink" class="receipt-link" style="display: none;">
-        <p>تم حفظ البيانات بنجاح! يمكنك الآن تحميل الإيصال:</p>
-        <button id="downloadReceipt" class="btn-receipt">📄 تحميل الإيصال</button>
-        <button id="sendWhatsapp" class="btn-whatsapp">📱 إرسال عبر واتساب</button>
+        <p>تم حفظ البيانات بنجاح! اختر طريقة الإيصال:</p>
+        <button id="downloadPDF" class="btn-receipt-ar">📄 تحميل إيصال PDF</button>
+        <button id="sendWhatsappWithReceipt" class="btn-whatsapp">📱 واتساب + رابط الإيصال</button>
       </div>
 
       <!-- أزرار التنقل الصغيرة -->
@@ -935,10 +935,10 @@
         // إظهار أزرار التحميل والواتساب
         document.getElementById('receiptLink').style.display = 'block';
         
-        // إعداد تحميل الإيصال المدمج
-        document.getElementById('downloadReceipt').onclick = function() {
-          console.log('تم الضغط على زر تحميل الإيصال');
-          generateCombinedReceipt({
+        // إعداد تحميل إيصال PDF
+        document.getElementById('downloadPDF').onclick = function() {
+          console.log('تم الضغط على زر تحميل الإيصال PDF');
+          generatePDFReceipt({
             customer: customer,
             date: date,
             amount: amount,
@@ -949,23 +949,64 @@
           });
         };
         
-        // إعداد واتساب
-        document.getElementById('sendWhatsapp').onclick = function() {
-          console.log('تم الضغط على زر إرسال واتساب');
-          const phone = '966' + mobile.slice(1);
-          const message = `🔔 *إشعار سداد*\n\n` +
-                         `👤 العميل: *${customer}*\n` +
-                         `📅 التاريخ: *${date}*\n` +
-                         `💰 المبلغ: *${amount}* ريال\n` +
-                         `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
-                         `💳 طريقة الدفع: *${paymentMethod}*\n` +
-                         `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
-                         `ُفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه ... شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
-                         `دونات وحشوة 🍩`;
+        // إعداد واتساب مع رابط الإيصال
+        document.getElementById('sendWhatsappWithReceipt').onclick = async function() {
+          console.log('تم الضغط على زر إرسال واتساب مع رابط الإيصال');
           
-          const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-          console.log('رابط الواتساب:', whatsappUrl);
-          window.open(whatsappUrl, '_blank');
+          // إنشاء الإيصال PDF أولاً وحفظه كـ Blob
+          const pdfBlob = await generatePDFBlobReceipt({
+            customer: customer,
+            date: date,
+            amount: amount,
+            invoiceNumber: invoiceNumber,
+            paymentMethod: paymentMethod,
+            mobile: mobile,
+            notes: notes
+          });
+          
+          if (pdfBlob) {
+            // إنشاء رابط تحميل مؤقت
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const receiptFilename = `Receipt_${invoiceNumber}_${date.replace(/-/g, '')}.pdf`;
+            
+            // إنشاء رابط قابل للنسخ
+            const receiptLink = `${window.location.origin}/${receiptFilename}`;
+            
+            const phone = '966' + mobile.slice(1);
+            const message = `🔔 *إشعار سداد*\n\n` +
+                           `👤 العميل: *${customer}*\n` +
+                           `📅 التاريخ: *${date}*\n` +
+                           `💰 المبلغ: *${amount}* ريال\n` +
+                           `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
+                           `💳 طريقة الدفع: *${paymentMethod}*\n` +
+                           `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
+                           `📄 *تحميل الإيصال:*\n` +
+                           `يمكنك تحميل الإيصال مباشرة من الرابط التالي:\n` +
+                           `${pdfUrl}\n\n` +
+                           `ُفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه ... شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
+                           `دونات وحشوة 🍩`;
+            
+            const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+            console.log('رابط الواتساب مع الإيصال:', whatsappUrl);
+            
+            // فتح واتساب
+            window.open(whatsappUrl, '_blank');
+            
+            // تنزيل الملف تلقائياً أيضاً
+            const downloadLink = document.createElement('a');
+            downloadLink.href = pdfUrl;
+            downloadLink.download = receiptFilename;
+            downloadLink.click();
+            
+            // تنظيف الرابط المؤقت بعد فترة
+            setTimeout(() => {
+              URL.revokeObjectURL(pdfUrl);
+            }, 60000);
+            
+            alert('تم إرسال رسالة واتساب مع رابط الإيصال وتحميل الملف! 📱📄');
+          } else {
+            alert('حدث خطأ في إنشاء الإيصال. يرجى المحاولة مرة أخرى.');
+          }
         };
 
         // إعادة تعيين النموذج
@@ -986,7 +1027,7 @@
         
         // إعداد تحميل الإيصال
         document.getElementById('downloadReceipt').onclick = function() {
-          console.log('تم الضغط على زر تحميل الإيصال (حالة خطأ)');
+          console.log('تم الضغط على زر تحميل الإيصال HTML (حالة خطأ)');
           generateCombinedReceipt({
             customer: customer,
             date: date,
@@ -998,23 +1039,75 @@
           });
         };
         
-        // إعداد واتساب
-        document.getElementById('sendWhatsapp').onclick = function() {
-          console.log('تم الضغط على زر إرسال واتساب (حالة خطأ)');
-          const phone = '966' + mobile.slice(1);
-          const message = `🔔 *إشعار سداد*\n\n` +
-                         `👤 العميل: *${customer}*\n` +
-                         `📅 التاريخ: *${date}*\n` +
-                         `💰 المبلغ: *${amount}* ريال\n` +
-                         `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
-                         `💳 طريقة الدفع: *${paymentMethod}*\n` +
-                         `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
-                         `ُفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه ... شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
-                         `دونات وحشوة 🍩`;
+        // إعداد تحميل إيصال PDF
+        document.getElementById('downloadPDF').onclick = function() {
+          console.log('تم الضغط على زر تحميل الإيصال PDF (حالة خطأ)');
+          generatePDFReceipt({
+            customer: customer,
+            date: date,
+            amount: amount,
+            invoiceNumber: invoiceNumber,
+            paymentMethod: paymentMethod,
+            mobile: mobile,
+            notes: notes
+          });
+        };
+        
+        // إعداد واتساب مع رابط الإيصال
+        document.getElementById('sendWhatsappWithReceipt').onclick = async function() {
+          console.log('تم الضغط على زر إرسال واتساب مع رابط الإيصال (حالة خطأ)');
           
-          const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-          console.log('رابط الواتساب (حالة خطأ):', whatsappUrl);
-          window.open(whatsappUrl, '_blank');
+          // إنشاء الإيصال PDF أولاً وحفظه كـ Blob
+          const pdfBlob = await generatePDFBlobReceipt({
+            customer: customer,
+            date: date,
+            amount: amount,
+            invoiceNumber: invoiceNumber,
+            paymentMethod: paymentMethod,
+            mobile: mobile,
+            notes: notes
+          });
+          
+          if (pdfBlob) {
+            // إنشاء رابط تحميل مؤقت
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const receiptFilename = `Receipt_${invoiceNumber}_${date.replace(/-/g, '')}.pdf`;
+            
+            const phone = '966' + mobile.slice(1);
+            const message = `🔔 *إشعار سداد*\n\n` +
+                           `👤 العميل: *${customer}*\n` +
+                           `📅 التاريخ: *${date}*\n` +
+                           `💰 المبلغ: *${amount}* ريال\n` +
+                           `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
+                           `💳 طريقة الدفع: *${paymentMethod}*\n` +
+                           `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
+                           `📄 *تحميل الإيصال:*\n` +
+                           `يمكنك تحميل الإيصال مباشرة من الرابط التالي:\n` +
+                           `${pdfUrl}\n\n` +
+                           `ُفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه ... شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
+                           `دونات وحشوة 🍩`;
+            
+            const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+            console.log('رابط الواتساب مع الإيصال (حالة خطأ):', whatsappUrl);
+            
+            // فتح واتساب
+            window.open(whatsappUrl, '_blank');
+            
+            // تنزيل الملف تلقائياً أيضاً
+            const downloadLink = document.createElement('a');
+            downloadLink.href = pdfUrl;
+            downloadLink.download = receiptFilename;
+            downloadLink.click();
+            
+            // تنظيف الرابط المؤقت بعد فترة
+            setTimeout(() => {
+              URL.revokeObjectURL(pdfUrl);
+            }, 60000);
+            
+            alert('تم إرسال رسالة واتساب مع رابط الإيصال وتحميل الملف! 📱📄');
+          } else {
+            alert('حدث خطأ في إنشاء الإيصال. يرجى المحاولة مرة أخرى.');
+          }
         };
 
         // إعادة تعيين النموذج (حالة الخطأ)
@@ -1031,328 +1124,823 @@
     // دالة إنشاء إيصال مدمج (عربي وإنجليزي) في صفحة واحدة
     function generateCombinedReceipt(data) {
       try {
+        console.log('بدء إنشاء الإيصال المدمج مع البيانات:', data);
+        
         // إنشاء نافذة جديدة للطباعة
         const printWindow = window.open('', '_blank');
         
+        if (!printWindow) {
+          alert('تم حظر النافذة المنبثقة! يرجى السماح بالنوافذ المنبثقة وإعادة المحاولة.');
+          return;
+        }
+        
+        console.log('تم فتح النافذة الجديدة بنجاح');
+        
         // محتوى HTML للإيصال المدمج
-        const receiptHTML = `
-        <!DOCTYPE html>
-        <html dir="rtl" lang="ar">
-        <head>
-          <meta charset="UTF-8">
-          <title>إيصال دفعة - Payment Receipt</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-            
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            
-            body {
-              font-family: 'Cairo', Arial, sans-serif;
-              background: #f5f5f5;
-              padding: 20px;
-              line-height: 1.6;
-            }
-            
-            .receipt-container {
-              max-width: 800px;
-              margin: 0 auto;
-              background: white;
-              border-radius: 15px;
-              box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-              overflow: hidden;
-              page-break-inside: avoid;
-            }
-            
-            .header {
-              background: linear-gradient(135deg, #e91e63 0%, #f06292 50%, #e91e63 100%);
-              color: white;
-              padding: 30px;
-              text-align: center;
-              position: relative;
-            }
-            
-            .logo-container {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin-bottom: 20px;
-            }
-            
-            .logo {
-              width: 80px;
-              height: 80px;
-              border-radius: 50%;
-              background: white;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin-left: 20px;
-              box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-              overflow: hidden;
-            }
-            
-            .logo img {
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              object-fit: cover;
-            }
-            
-            .company-info {
-              text-align: center;
-            }
-            
-            .company-name-ar {
-              font-size: 32px;
-              font-weight: 700;
-              margin-bottom: 5px;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            
-            .company-name-en {
-              font-size: 20px;
-              font-weight: 600;
-              opacity: 0.9;
-              margin-bottom: 10px;
-            }
-            
-            .subtitle {
-              font-size: 16px;
-              opacity: 0.8;
-            }
-            
-            .content {
-              padding: 40px;
-            }
-            
-            .receipt-title {
-              text-align: center;
-              font-size: 28px;
-              font-weight: 600;
-              color: #e91e63;
-              margin-bottom: 30px;
-              border-bottom: 3px solid #e91e63;
-              padding-bottom: 15px;
-              position: relative;
-            }
-            
-            .receipt-title::after {
-              content: 'Payment Receipt';
-              display: block;
-              font-size: 18px;
-              color: #666;
-              margin-top: 8px;
-              font-weight: 400;
-            }
-            
-            .details-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 20px;
-              margin-bottom: 30px;
-            }
-            
-            .detail-item {
-              padding: 20px;
-              background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
-              border-radius: 12px;
-              border-right: 4px solid #e91e63;
-              box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            }
-            
-            .detail-label-ar {
-              font-size: 16px;
-              color: #e91e63;
-              margin-bottom: 5px;
-              font-weight: 600;
-            }
-            
-            .detail-label-en {
-              font-size: 12px;
-              color: #999;
-              margin-bottom: 8px;
-              font-style: italic;
-            }
-            
-            .detail-value {
-              font-size: 18px;
-              font-weight: 600;
-              color: #333;
-            }
-            
-            .amount-highlight {
-              background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
-              color: white;
-              border: none;
-              text-align: center;
-              grid-column: 1 / -1;
-              transform: scale(1.02);
-            }
-            
-            .amount-highlight .detail-label-ar,
-            .amount-highlight .detail-label-en {
-              color: rgba(255,255,255,0.9);
-            }
-            
-            .amount-highlight .detail-value {
-              color: white;
-              font-size: 28px;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            
-            .notes-section {
-              background: linear-gradient(145deg, #fff3e0 0%, #ffffff 100%);
-              border-radius: 12px;
-              padding: 25px;
-              margin-bottom: 30px;
-              border-right: 4px solid #ff9800;
-              box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            }
-            
-            .footer {
-              text-align: center;
-              background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-              padding: 30px;
-              border-top: 3px dashed #e91e63;
-            }
-            
-            .thank-you-ar {
-              font-size: 24px;
-              font-weight: 700;
-              color: #e91e63;
-              margin-bottom: 8px;
-            }
-            
-            .thank-you-en {
-              font-size: 16px;
-              color: #666;
-              margin-bottom: 15px;
-            }
-            
-            .company-footer {
-              font-size: 14px;
-              color: #999;
-              margin-bottom: 15px;
-            }
-            
-            .timestamp {
-              font-size: 12px;
-              color: #666;
-              background: white;
-              padding: 10px;
-              border-radius: 8px;
-              border: 1px solid #e0e0e0;
-            }
-            
-            @media print {
-              body { 
-                background: white; 
-                padding: 0;
-              }
-              .receipt-container { 
-                box-shadow: none; 
-                border-radius: 0;
-                max-width: 100%;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt-container">
-            <div class="header">
-              <div class="logo-container">
-                <div class="logo">
-                  <img src="logo-01.png" alt="دونات وحشوة" onerror="this.parentElement.innerHTML='<div style=\\"color:#e91e63;font-weight:bold;font-size:20px\\">D&H</div>'">
-                </div>
-                <div class="company-info">
-                  <div class="company-name-ar">دونات وحشوة</div>
-                  <div class="company-name-en">Donuts & Hashua</div>
-                  <div class="subtitle">متخصصون في الدونات والحشوات الفاخرة</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="content">
-              <div class="receipt-title">إيصال دفعة مالية</div>
-              
-              <div class="details-grid">
-                <div class="detail-item">
-                  <div class="detail-label-ar">العميل</div>
-                  <div class="detail-label-en">Customer</div>
-                  <div class="detail-value">${data.customer}</div>
-                </div>
-                
-                <div class="detail-item">
-                  <div class="detail-label-ar">التاريخ</div>
-                  <div class="detail-label-en">Date</div>
-                  <div class="detail-value">${data.date}</div>
-                </div>
-                
-                <div class="detail-item">
-                  <div class="detail-label-ar">رقم الفاتورة</div>
-                  <div class="detail-label-en">Invoice Number</div>
-                  <div class="detail-value">${data.invoiceNumber}</div>
-                </div>
-                
-                <div class="detail-item">
-                  <div class="detail-label-ar">طريقة الدفع</div>
-                  <div class="detail-label-en">Payment Method</div>
-                  <div class="detail-value">${data.paymentMethod}</div>
-                </div>
-                
-                <div class="detail-item">
-                  <div class="detail-label-ar">رقم الجوال</div>
-                  <div class="detail-label-en">Mobile Number</div>
-                  <div class="detail-value">${data.mobile}</div>
-                </div>
-                
-                <div class="detail-item amount-highlight">
-                  <div class="detail-label-ar">المبلغ المدفوع</div>
-                  <div class="detail-label-en">Amount Paid</div>
-                  <div class="detail-value">${data.amount} ريال سعودي</div>
-                </div>
-              </div>
-              
-              ${data.notes && data.notes.trim() !== '' ? `
-              <div class="notes-section">
-                <div class="detail-label-ar">ملاحظات</div>
-                <div class="detail-label-en">Notes</div>
-                <div class="detail-value">${data.notes}</div>
-              </div>
-              ` : ''}
-            </div>
-            
-            <div class="footer">
-              <div class="thank-you-ar">شكراً لتعاملكم معنا 🍩</div>
-              <div class="thank-you-en">Thank you for your business!</div>
-              <div class="company-footer">نظام إدارة دونات وحشوة - Donuts & Hashua Management System</div>
-              <div class="timestamp">
-                تم الإنشاء في: ${new Date().toLocaleString('ar-SA')} | 
-                Generated on: ${new Date().toLocaleString('en-GB')}
-              </div>
-            </div>
-          </div>
-        </body>
-        </html>
-        `;
+        const receiptHTML = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إيصال دفعة - Payment Receipt</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Cairo', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      line-height: 1.6;
+      direction: rtl;
+    }
+    
+    .receipt-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #e91e63 0%, #f06292 50%, #e91e63 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-direction: row-reverse;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      font-size: 24px;
+      font-weight: bold;
+      color: #e91e63;
+    }
+    
+    .company-info {
+      text-align: center;
+    }
+    
+    .company-name-ar {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .company-name-en {
+      font-size: 20px;
+      font-weight: 600;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.8;
+    }
+    
+    .content {
+      padding: 40px;
+    }
+    
+    .receipt-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 600;
+      color: #e91e63;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #e91e63;
+      padding-bottom: 15px;
+    }
+    
+    .receipt-title::after {
+      content: 'Payment Receipt';
+      display: block;
+      font-size: 18px;
+      color: #666;
+      margin-top: 8px;
+      font-weight: 400;
+    }
+    
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .detail-item {
+      padding: 20px;
+      background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 12px;
+      border-right: 4px solid #e91e63;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .detail-label-ar {
+      font-size: 16px;
+      color: #e91e63;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    
+    .detail-label-en {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+    
+    .detail-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .amount-highlight {
+      background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
+      color: white;
+      border: none;
+      text-align: center;
+      grid-column: 1 / -1;
+      transform: scale(1.02);
+    }
+    
+    .amount-highlight .detail-label-ar,
+    .amount-highlight .detail-label-en {
+      color: rgba(255,255,255,0.9);
+    }
+    
+    .amount-highlight .detail-value {
+      color: white;
+      font-size: 28px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .notes-section {
+      background: linear-gradient(145deg, #fff3e0 0%, #ffffff 100%);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      border-right: 4px solid #ff9800;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .footer {
+      text-align: center;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 30px;
+      border-top: 3px dashed #e91e63;
+    }
+    
+    .thank-you-ar {
+      font-size: 24px;
+      font-weight: 700;
+      color: #e91e63;
+      margin-bottom: 8px;
+    }
+    
+    .thank-you-en {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    
+    .company-footer {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+    
+    .timestamp {
+      font-size: 12px;
+      color: #666;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    @media print {
+      body { 
+        background: white; 
+        padding: 0;
+      }
+      .receipt-container { 
+        box-shadow: none; 
+        border-radius: 0;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt-container">
+    <div class="header">
+      <div class="logo-container">
+        <div class="logo">D&H</div>
+        <div class="company-info">
+          <div class="company-name-ar">دونات وحشوة</div>
+          <div class="company-name-en">Donuts and filling</div>
+          <div class="subtitle">متخصصون في الدونات والحشوات الفاخرة</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="content">
+      <div class="receipt-title">إيصال دفعة مالية</div>
+      
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label-ar">العميل</div>
+          <div class="detail-label-en">Customer</div>
+          <div class="detail-value">${data.customer}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label-ar">التاريخ</div>
+          <div class="detail-label-en">Date</div>
+          <div class="detail-value">${data.date}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label-ar">رقم الفاتورة</div>
+          <div class="detail-label-en">Invoice Number</div>
+          <div class="detail-value">${data.invoiceNumber}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label-ar">طريقة الدفع</div>
+          <div class="detail-label-en">Payment Method</div>
+          <div class="detail-value">${data.paymentMethod}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label-ar">رقم الجوال</div>
+          <div class="detail-label-en">Mobile Number</div>
+          <div class="detail-value">${data.mobile}</div>
+        </div>
+        
+        <div class="detail-item amount-highlight">
+          <div class="detail-label-ar">المبلغ المدفوع</div>
+          <div class="detail-label-en">Amount Paid</div>
+          <div class="detail-value">${data.amount} ريال سعودي</div>
+        </div>
+      </div>
+      
+      ${data.notes && data.notes.trim() !== '' ? `
+      <div class="notes-section">
+        <div class="detail-label-ar">ملاحظات</div>
+        <div class="detail-label-en">Notes</div>
+        <div class="detail-value">${data.notes}</div>
+      </div>
+      ` : ''}
+    </div>
+    
+    <div class="footer">
+      <div class="thank-you-ar">شكراً لتعاملكم معنا 🍩</div>
+      <div class="thank-you-en">Thank you for your business!</div>
+      <div class="company-footer">نظام إدارة دونات وحشوة - Donuts & Hashua Management System</div>
+      <div class="timestamp">
+        تم الإنشاء في: ${new Date().toLocaleString('ar-SA')} | 
+        Generated on: ${new Date().toLocaleString('en-GB')}
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
         
         printWindow.document.write(receiptHTML);
         printWindow.document.close();
         
-        // طباعة تلقائية بعد تحميل المحتوى
+        console.log('تم كتابة HTML في النافذة الجديدة');
+        
+        // انتظار تحميل المحتوى قبل الطباعة
+        printWindow.addEventListener('load', function() {
+          console.log('تم تحميل محتوى النافذة بالكامل');
+          setTimeout(() => {
+            console.log('بدء عملية الطباعة');
+            printWindow.print();
+          }, 1000);
+        });
+        
+        // طباعة تلقائية بعد تحميل المحتوى (احتياطي)
         setTimeout(() => {
-          printWindow.print();
-        }, 1000);
+          console.log('طباعة احتياطية بعد 2 ثانية');
+          if (printWindow && !printWindow.closed) {
+            printWindow.print();
+          }
+        }, 2000);
         
         alert('تم فتح الإيصال في نافذة جديدة! يمكنك طباعته أو حفظه 📄');
         
       } catch (error) {
         console.error('خطأ في إنشاء الإيصال:', error);
         alert('حدث خطأ في إنشاء الإيصال. يرجى المحاولة مرة أخرى.');
+      }
+    }
+    
+    // دالة إنشاء إيصال PDF كـ Blob للرابط في الواتساب
+    async function generatePDFBlobReceipt(data) {
+      try {
+        console.log('بدء إنشاء إيصال PDF Blob مع البيانات:', data);
+        
+        const { jsPDF } = window.jspdf;
+        
+        // إعداد المقاس المطلوب: 57مم عرض × 290مم ارتفاع
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: [57, 290]
+        });
+        
+        // تحميل الشعار من GitHub
+        const logoUrl = 'https://raw.githubusercontent.com/jawednoor/donuts-system/refs/heads/main/logo-01.png';
+        
+        // دالة تحويل الصورة إلى Base64
+        const getImageBase64 = (url) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = this.width;
+              canvas.height = this.height;
+              ctx.drawImage(this, 0, 0);
+              const dataURL = canvas.toDataURL('image/png');
+              resolve(dataURL);
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+        
+        try {
+          // تحميل الشعار
+          const logoBase64 = await getImageBase64(logoUrl);
+          
+          // إضافة الشعار في أعلى الإيصال
+          doc.addImage(logoBase64, 'PNG', 16, 5, 25, 25);
+          console.log('تم إضافة الشعار بنجاح');
+        } catch (logoError) {
+          console.log('لم يتم تحميل الشعار، سيتم استخدام النص البديل');
+          // إضافة النص البديل
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text('D&H', 28.5, 20, { align: 'center' });
+        }
+        
+        // اسم الشركة
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('دونات وحشوة', 28.5, 35, { align: 'center' });
+        
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Donuts and filling', 28.5, 40, { align: 'center' });
+        
+        // خط فاصل
+        doc.setLineWidth(0.5);
+        doc.line(5, 45, 52, 45);
+        
+        // عنوان الإيصال
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Payment Receipt', 28.5, 52, { align: 'center' });
+        doc.text('إيصال دفعة', 28.5, 57, { align: 'center' });
+        
+        // خط فاصل
+        doc.line(5, 62, 52, 62);
+        
+        // البيانات
+        let yPos = 70;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        
+        // العميل
+        doc.setFont('helvetica', 'bold');
+        doc.text('العميل / Customer:', 5, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text(data.customer, 5, yPos);
+        yPos += 10;
+        
+        // التاريخ
+        doc.setFont('helvetica', 'bold');
+        doc.text('التاريخ / Date:', 5, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text(data.date, 5, yPos);
+        yPos += 10;
+        
+        // رقم الفاتورة
+        doc.setFont('helvetica', 'bold');
+        doc.text('رقم الفاتورة / Invoice:', 5, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text(data.invoiceNumber, 5, yPos);
+        yPos += 10;
+        
+        // طريقة الدفع
+        doc.setFont('helvetica', 'bold');
+        doc.text('طريقة الدفع / Method:', 5, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text(data.paymentMethod, 5, yPos);
+        yPos += 10;
+        
+        // رقم الجوال
+        doc.setFont('helvetica', 'bold');
+        doc.text('الجوال / Mobile:', 5, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text(data.mobile, 5, yPos);
+        yPos += 15;
+        
+        // خط فاصل قبل المبلغ
+        doc.setLineWidth(1);
+        doc.line(5, yPos, 52, yPos);
+        yPos += 8;
+        
+        // المبلغ (مميز)
+        doc.setFillColor(233, 30, 99);
+        doc.rect(5, yPos - 3, 47, 15, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('المبلغ / Amount:', 28.5, yPos + 3, { align: 'center' });
+        doc.setFontSize(14);
+        doc.text(`${data.amount} ريال`, 28.5, yPos + 9, { align: 'center' });
+        
+        yPos += 20;
+        doc.setTextColor(0, 0, 0);
+        
+        // الملاحظات إذا وجدت
+        if (data.notes && data.notes.trim() !== '') {
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.text('ملاحظات / Notes:', 5, yPos);
+          yPos += 5;
+          doc.setFont('helvetica', 'normal');
+          
+          // تقسيم النص الطويل
+          const noteLines = doc.splitTextToSize(data.notes, 47);
+          doc.text(noteLines, 5, yPos);
+          yPos += noteLines.length * 4 + 5;
+        }
+        
+        // خط فاصل
+        yPos += 5;
+        doc.setLineWidth(0.5);
+        doc.line(5, yPos, 52, yPos);
+        yPos += 8;
+        
+        // رسالة الشكر
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('شكراً لتعاملكم معنا 🍩', 28.5, yPos, { align: 'center' });
+        yPos += 5;
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Thank you for your business!', 28.5, yPos, { align: 'center' });
+        yPos += 10;
+        
+        // معلومات النظام
+        doc.setFontSize(7);
+        doc.setTextColor(128, 128, 128);
+        doc.text('نظام إدارة دونات وحشوة', 28.5, yPos, { align: 'center' });
+        yPos += 4;
+        doc.text('Donuts Management System', 28.5, yPos, { align: 'center' });
+        yPos += 8;
+        
+        // الوقت والتاريخ
+        const now = new Date();
+        const timestamp = now.toLocaleString('ar-SA');
+        doc.setFontSize(6);
+        doc.text(`تم الإنشاء: ${timestamp}`, 28.5, yPos, { align: 'center' });
+        yPos += 3;
+        doc.text(`Generated: ${now.toLocaleString('en-GB')}`, 28.5, yPos, { align: 'center' });
+        
+        // إرجاع الـ PDF كـ Blob
+        const pdfBlob = doc.output('blob');
+        console.log('تم إنشاء PDF Blob بنجاح');
+        return pdfBlob;
+        
+      } catch (error) {
+        console.error('خطأ في إنشاء PDF Blob:', error);
+        return null;
+      }
+    }
+    
+    // دالة إنشاء إيصال PDF محسّنة بألوان وتنسيقات مطورة
+    async function generatePDFReceipt(data) {
+      try {
+        console.log('بدء إنشاء إيصال PDF محسّن مع البيانات:', data);
+        
+        const { jsPDF } = window.jspdf;
+        
+        // إعداد المقاس المطلوب: 57مم عرض × 290مم ارتفاع
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: [57, 290]
+        });
+        
+        // ألوان مخصصة للتصميم
+        const colors = {
+          primary: [233, 30, 99],      // اللون الأساسي (وردي)
+          secondary: [63, 81, 181],    // اللون الثانوي (أزرق)
+          success: [76, 175, 80],      // اللون الأخضر
+          accent: [255, 193, 7],       // اللون الذهبي
+          dark: [33, 37, 41],          // اللون الداكن
+          light: [248, 249, 250],      // اللون الفاتح
+          white: [255, 255, 255],      // الأبيض
+          text: [52, 58, 64]           // لون النص
+        };
+        
+        // خلفية ملونة للإيصال
+        doc.setFillColor(...colors.light);
+        doc.rect(0, 0, 57, 290, 'F');
+        
+        // شريط علوي ملون
+        doc.setFillColor(...colors.primary);
+        doc.rect(0, 0, 57, 40, 'F');
+        
+        // تحميل الشعار من GitHub
+        const logoUrl = 'https://raw.githubusercontent.com/jawednoor/donuts-system/refs/heads/main/logo-01.png';
+        
+        // دالة تحويل الصورة إلى Base64
+        const getImageBase64 = (url) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = this.width;
+              canvas.height = this.height;
+              ctx.drawImage(this, 0, 0);
+              const dataURL = canvas.toDataURL('image/png');
+              resolve(dataURL);
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+        
+        try {
+          // تحميل الشعار
+          const logoBase64 = await getImageBase64(logoUrl);
+          
+          // إضافة الشعار في أعلى الإيصال
+          doc.addImage(logoBase64, 'PNG', 16, 5, 25, 25);
+          console.log('تم إضافة الشعار بنجاح');
+        } catch (logoError) {
+          console.log('لم يتم تحميل الشعار، سيتم استخدام النص البديل');
+          // إضافة النص البديل
+          doc.setTextColor(...colors.white);
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.text('D&H', 28.5, 20, { align: 'center' });
+        }
+        
+        // اسم الشركة بالعربية (في الشريط العلوي)
+        doc.setTextColor(...colors.white);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        // استخدام Unicode للنص العربي
+        const companyNameAr = 'دونات وحشوة';
+        doc.text(companyNameAr, 28.5, 35, { align: 'center' });
+        
+        // اسم الشركة بالإنجليزية
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Donuts and Filling', 28.5, 38, { align: 'center' });
+        
+        // منطقة المحتوى الرئيسي
+        let yPos = 50;
+        
+        // عنوان الإيصال مع خلفية ملونة
+        doc.setFillColor(...colors.secondary);
+        doc.roundedRect(5, yPos, 47, 12, 2, 2, 'F');
+        
+        doc.setTextColor(...colors.white);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Payment Receipt', 28.5, yPos + 4, { align: 'center' });
+        doc.text('إيصال دفعة', 28.5, yPos + 8, { align: 'center' });
+        
+        yPos += 18;
+        
+        // إطار للبيانات الأساسية
+        doc.setDrawColor(...colors.primary);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(3, yPos, 51, 95, 3, 3, 'S');
+        
+        yPos += 8;
+        
+        // البيانات مع تنسيق محسّن
+        doc.setTextColor(...colors.text);
+        doc.setFontSize(8);
+        
+        // العميل
+        doc.setFillColor(...colors.accent);
+        doc.roundedRect(5, yPos - 2, 47, 8, 1, 1, 'F');
+        doc.setTextColor(...colors.dark);
+        doc.setFont('helvetica', 'bold');
+        doc.text('العميل / Customer', 28.5, yPos + 2, { align: 'center' });
+        yPos += 10;
+        
+        doc.setTextColor(...colors.text);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(data.customer, 28.5, yPos, { align: 'center' });
+        yPos += 12;
+        
+        // التاريخ
+        doc.setFillColor(...colors.success);
+        doc.roundedRect(5, yPos - 2, 47, 8, 1, 1, 'F');
+        doc.setTextColor(...colors.white);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('التاريخ / Date', 28.5, yPos + 2, { align: 'center' });
+        yPos += 10;
+        
+        doc.setTextColor(...colors.text);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(data.date, 28.5, yPos, { align: 'center' });
+        yPos += 12;
+        
+        // رقم الفاتورة
+        doc.setFillColor(...colors.secondary);
+        doc.roundedRect(5, yPos - 2, 47, 8, 1, 1, 'F');
+        doc.setTextColor(...colors.white);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('رقم الفاتورة / Invoice', 28.5, yPos + 2, { align: 'center' });
+        yPos += 10;
+        
+        doc.setTextColor(...colors.text);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(data.invoiceNumber, 28.5, yPos, { align: 'center' });
+        yPos += 12;
+        
+        // طريقة الدفع
+        doc.setFillColor(...colors.primary);
+        doc.roundedRect(5, yPos - 2, 47, 8, 1, 1, 'F');
+        doc.setTextColor(...colors.white);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('طريقة الدفع / Method', 28.5, yPos + 2, { align: 'center' });
+        yPos += 10;
+        
+        doc.setTextColor(...colors.text);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(data.paymentMethod, 28.5, yPos, { align: 'center' });
+        yPos += 12;
+        
+        // رقم الجوال
+        doc.setFillColor(...colors.accent);
+        doc.roundedRect(5, yPos - 2, 47, 8, 1, 1, 'F');
+        doc.setTextColor(...colors.dark);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('الجوال / Mobile', 28.5, yPos + 2, { align: 'center' });
+        yPos += 10;
+        
+        doc.setTextColor(...colors.text);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(data.mobile, 28.5, yPos, { align: 'center' });
+        yPos += 18;
+        
+        // المبلغ (مميز جداً)
+        doc.setFillColor(...colors.primary);
+        doc.roundedRect(3, yPos - 5, 51, 20, 3, 3, 'F');
+        
+        // إطار داخلي للمبلغ
+        doc.setFillColor(...colors.white);
+        doc.roundedRect(5, yPos - 3, 47, 16, 2, 2, 'F');
+        
+        doc.setTextColor(...colors.primary);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('المبلغ / Amount', 28.5, yPos + 3, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${data.amount} ريال`, 28.5, yPos + 9, { align: 'center' });
+        
+        yPos += 25;
+        
+        // الملاحظات إذا وجدت
+        if (data.notes && data.notes.trim() !== '') {
+          doc.setFillColor(...colors.light);
+          doc.roundedRect(5, yPos, 47, 20, 2, 2, 'F');
+          
+          doc.setTextColor(...colors.text);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.text('ملاحظات / Notes', 28.5, yPos + 5, { align: 'center' });
+          
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7);
+          
+          // تقسيم النص الطويل
+          const noteLines = doc.splitTextToSize(data.notes, 45);
+          let noteY = yPos + 10;
+          noteLines.forEach(line => {
+            doc.text(line, 28.5, noteY, { align: 'center' });
+            noteY += 3;
+          });
+          
+          yPos += 25;
+        }
+        
+        // خط فاصل زخرفي
+        yPos += 5;
+        doc.setDrawColor(...colors.primary);
+        doc.setLineWidth(1);
+        doc.line(10, yPos, 47, yPos);
+        // نقاط زخرفية
+        doc.circle(8, yPos, 1, 'F');
+        doc.circle(49, yPos, 1, 'F');
+        yPos += 8;
+        
+        // رسالة الشكر مع خلفية ملونة
+        doc.setFillColor(...colors.success);
+        doc.roundedRect(5, yPos, 47, 15, 2, 2, 'F');
+        
+        doc.setTextColor(...colors.white);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('شكراً لتعاملكم معنا 🍩', 28.5, yPos + 6, { align: 'center' });
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Thank you for your business!', 28.5, yPos + 10, { align: 'center' });
+        yPos += 20;
+        
+        // معلومات النظام
+        doc.setFillColor(...colors.light);
+        doc.roundedRect(5, yPos, 47, 25, 2, 2, 'F');
+        
+        doc.setTextColor(...colors.text);
+        doc.setFontSize(6);
+        doc.setFont('helvetica', 'bold');
+        doc.text('نظام إدارة دونات وحشوة', 28.5, yPos + 6, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.text('Donuts Management System', 28.5, yPos + 10, { align: 'center' });
+        
+        // الوقت والتاريخ
+        const now = new Date();
+        const timestamp = now.toLocaleString('ar-SA');
+        doc.setFontSize(5);
+        doc.setTextColor(...colors.dark);
+        doc.text(`تم الإنشاء: ${timestamp}`, 28.5, yPos + 15, { align: 'center' });
+        doc.text(`Generated: ${now.toLocaleString('en-GB')}`, 28.5, yPos + 18, { align: 'center' });
+        
+        // شريط سفلي ملون
+        doc.setFillColor(...colors.primary);
+        doc.rect(0, 285, 57, 5, 'F');
+        
+        // حفظ الملف
+        const filename = `Receipt_${data.invoiceNumber}_${data.date.replace(/-/g, '')}.pdf`;
+        doc.save(filename);
+        
+        console.log('تم إنشاء ملف PDF محسّن بنجاح:', filename);
+        alert('تم تحميل إيصال PDF محسّن بألوان وتنسيقات جميلة! 📄✨');
+        
+      } catch (error) {
+        console.error('خطأ في إنشاء ملف PDF:', error);
+        alert('حدث خطأ في إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
       }
     }
   </script>
