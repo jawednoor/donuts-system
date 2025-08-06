@@ -937,20 +937,8 @@
         
         // إعداد تحميل الإيصال المدمج
         document.getElementById('downloadReceipt').onclick = function() {
+          console.log('تم الضغط على زر تحميل الإيصال');
           generateCombinedReceipt({
-            customer: customer,
-            date: date,
-            amount: amount,
-            invoiceNumber: invoiceNumber,
-            paymentMethod: paymentMethod,
-            mobile: mobile,
-            notes: notes
-          });
-        };
-        
-        // إعداد تحميل الإيصال العربي
-        document.getElementById('downloadArabicReceipt').onclick = function() {
-          generateArabicReceipt({
             customer: customer,
             date: date,
             amount: amount,
@@ -963,6 +951,7 @@
         
         // إعداد واتساب
         document.getElementById('sendWhatsapp').onclick = function() {
+          console.log('تم الضغط على زر إرسال واتساب');
           const phone = '966' + mobile.slice(1);
           const message = `🔔 *إشعار سداد*\n\n` +
                          `👤 العميل: *${customer}*\n` +
@@ -975,6 +964,7 @@
                          `دونات وحشوة 🍩`;
           
           const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+          console.log('رابط الواتساب:', whatsappUrl);
           window.open(whatsappUrl, '_blank');
         };
 
@@ -996,20 +986,8 @@
         
         // إعداد تحميل الإيصال
         document.getElementById('downloadReceipt').onclick = function() {
-          generatePDFReceipt({
-            customer: customer,
-            date: date,
-            amount: amount,
-            invoiceNumber: invoiceNumber,
-            paymentMethod: paymentMethod,
-            mobile: mobile,
-            notes: notes
-          });
-        };
-        
-        // إعداد تحميل الإيصال العربي
-        document.getElementById('downloadArabicReceipt').onclick = function() {
-          generateArabicReceipt({
+          console.log('تم الضغط على زر تحميل الإيصال (حالة خطأ)');
+          generateCombinedReceipt({
             customer: customer,
             date: date,
             amount: amount,
@@ -1022,6 +1000,7 @@
         
         // إعداد واتساب
         document.getElementById('sendWhatsapp').onclick = function() {
+          console.log('تم الضغط على زر إرسال واتساب (حالة خطأ)');
           const phone = '966' + mobile.slice(1);
           const message = `🔔 *إشعار سداد*\n\n` +
                          `👤 العميل: *${customer}*\n` +
@@ -1034,6 +1013,7 @@
                          `دونات وحشوة 🍩`;
           
           const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+          console.log('رابط الواتساب (حالة خطأ):', whatsappUrl);
           window.open(whatsappUrl, '_blank');
         };
 
