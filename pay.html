@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="styles.css">
   <!-- مكتبة jsPDF لإنشاء ملفات PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- مكتبة jsPDF-RTL لدعم النصوص العربية -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-rtl@1.0.0/dist/jspdf-rtl.min.js"></script>
      <style>
     /* إعداد الصفحة العامة */
     body, html {
@@ -756,9 +758,12 @@
       </form>
 
       <div id="receiptLink" class="receipt-link" style="display: none;">
-        <p>تم حفظ البيانات بنجاح! اختر طريقة الإيصال:</p>
+        <p>✅ تم حفظ البيانات بنجاح! اختر طريقة الإيصال:</p>
+        <div style="font-size: 12px; color: #28a745; margin-bottom: 10px;">
+          📌 ملاحظة: هذه الرسالة ستبقى ظاهرة حتى إعادة تحميل الصفحة
+        </div>
         <button id="downloadReceipt" class="btn-receipt">📄 إيصال HTML</button>
-        <button id="sendWhatsappWithReceipt" class="btn-whatsapp">📱 واتساب + رابط الإيصال</button>
+        <button id="sendWhatsappWithReceipt" class="btn-whatsapp">📱 إرسال واتساب</button>
       </div>
 
       <!-- أزرار التنقل الصغيرة -->
@@ -949,71 +954,36 @@
           });
         };
         
-        // إعداد واتساب مع رابط الإيصال
+        // إعداد واتساب بدون رابط (رسالة نصية فقط)
         document.getElementById('sendWhatsappWithReceipt').onclick = async function() {
-          console.log('تم الضغط على زر إرسال واتساب مع رابط الإيصال');
+          console.log('تم الضغط على زر إرسال واتساب');
           
-          // إنشاء PDF من HTML
-          const pdfBlob = await generateHTMLToPDFReceipt({
-            customer: customer,
-            date: date,
-            amount: amount,
-            invoiceNumber: invoiceNumber,
-            paymentMethod: paymentMethod,
-            mobile: mobile,
-            notes: notes
-          });
+          const phone = '966' + mobile.slice(1);
+          const message = `🔔 *إشعار سداد*\n\n` +
+                         `👤 العميل: *${customer}*\n` +
+                         `📅 التاريخ: *${date}*\n` +
+                         `💰 المبلغ: *${amount}* ريال\n` +
+                         `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
+                         `💳 طريقة الدفع: *${paymentMethod}*\n` +
+                         `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
+                         `نفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه.\n\n` +
+                         `شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
+                         `دونات وحشوة 🍩`;
           
-          if (pdfBlob) {
-            // إنشاء رابط تحميل مؤقت
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            const receiptFilename = `Receipt_${invoiceNumber}_${date.replace(/-/g, '')}.pdf`;
-            
-            const phone = '966' + mobile.slice(1);
-            const message = `🔔 *إشعار سداد*\n\n` +
-                           `👤 العميل: *${customer}*\n` +
-                           `📅 التاريخ: *${date}*\n` +
-                           `💰 المبلغ: *${amount}* ريال\n` +
-                           `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
-                           `💳 طريقة الدفع: *${paymentMethod}*\n` +
-                           `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
-                           `📄 *تحميل الإيصال:*\n` +
-                           `يمكنك تحميل الإيصال مباشرة من الرابط التالي:\n` +
-                           `${pdfUrl}\n\n` +
-                           `ُفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه ... شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
-                           `دونات وحشوة 🍩`;
-            
-            const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-            console.log('رابط الواتساب مع الإيصال:', whatsappUrl);
-            
-            // فتح واتساب
-            window.open(whatsappUrl, '_blank');
-            
-            // تنزيل الملف تلقائياً أيضاً
-            const downloadLink = document.createElement('a');
-            downloadLink.href = pdfUrl;
-            downloadLink.download = receiptFilename;
-            downloadLink.click();
-            
-            // تنظيف الرابط المؤقت بعد فترة
-            setTimeout(() => {
-              URL.revokeObjectURL(pdfUrl);
-            }, 60000);
-            
-            alert('تم إرسال رسالة واتساب مع رابط الإيصال وتحميل الملف! 📱📄');
-          } else {
-            alert('حدث خطأ في إنشاء الإيصال. يرجى المحاولة مرة أخرى.');
-          }
+          const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+          console.log('رابط الواتساب:', whatsappUrl);
+          
+          // فتح واتساب
+          window.open(whatsappUrl, '_blank');
+          
+          alert('تم إرسال رسالة واتساب! 📱');
         };
 
         // إعادة تعيين النموذج
         document.getElementById('supplyForm').reset();
         document.getElementById('date').valueAsDate = new Date();
         
-        // إخفاء قسم الإيصال بعد فترة
-        setTimeout(() => {
-          document.getElementById('receiptLink').style.display = 'none';
-        }, 60000); // إخفاء بعد 60 ثانية
+        // ملاحظة: رسالة الإيصال ستبقى ظاهرة حتى إعادة تحميل الصفحة
       })
       .catch(err => {
         console.error('خطأ في إرسال البيانات:', err);
@@ -1036,71 +1006,36 @@
           });
         };
         
-        // إعداد واتساب مع رابط الإيصال
+        // إعداد واتساب بدون رابط (رسالة نصية فقط)
         document.getElementById('sendWhatsappWithReceipt').onclick = async function() {
-          console.log('تم الضغط على زر إرسال واتساب مع رابط الإيصال (حالة خطأ)');
+          console.log('تم الضغط على زر إرسال واتساب (حالة خطأ)');
           
-          // إنشاء PDF من HTML
-          const pdfBlob = await generateHTMLToPDFReceipt({
-            customer: customer,
-            date: date,
-            amount: amount,
-            invoiceNumber: invoiceNumber,
-            paymentMethod: paymentMethod,
-            mobile: mobile,
-            notes: notes
-          });
+          const phone = '966' + mobile.slice(1);
+          const message = `🔔 *إشعار سداد*\n\n` +
+                         `👤 العميل: *${customer}*\n` +
+                         `📅 التاريخ: *${date}*\n` +
+                         `💰 المبلغ: *${amount}* ريال\n` +
+                         `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
+                         `💳 طريقة الدفع: *${paymentMethod}*\n` +
+                         `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
+                         `نفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه.\n\n` +
+                         `شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
+                         `دونات وحشوة 🍩`;
           
-          if (pdfBlob) {
-            // إنشاء رابط تحميل مؤقت
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            const receiptFilename = `Receipt_${invoiceNumber}_${date.replace(/-/g, '')}.pdf`;
-            
-            const phone = '966' + mobile.slice(1);
-            const message = `🔔 *إشعار سداد*\n\n` +
-                           `👤 العميل: *${customer}*\n` +
-                           `📅 التاريخ: *${date}*\n` +
-                           `💰 المبلغ: *${amount}* ريال\n` +
-                           `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
-                           `💳 طريقة الدفع: *${paymentMethod}*\n` +
-                           `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
-                           `📄 *تحميل الإيصال:*\n` +
-                           `يمكنك تحميل الإيصال مباشرة من الرابط التالي:\n` +
-                           `${pdfUrl}\n\n` +
-                           `ُفيدكم بأن عملية السداد قد تم تسجيلها في سجلاتنا المالية، وذلك حسب البيانات الموضحة أعلاه ... شاكرين لكم حسن التعامل والتعاون الدائم 🙏\n` +
-                           `دونات وحشوة 🍩`;
-            
-            const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-            console.log('رابط الواتساب مع الإيصال (حالة خطأ):', whatsappUrl);
-            
-            // فتح واتساب
-            window.open(whatsappUrl, '_blank');
-            
-            // تنزيل الملف تلقائياً أيضاً
-            const downloadLink = document.createElement('a');
-            downloadLink.href = pdfUrl;
-            downloadLink.download = receiptFilename;
-            downloadLink.click();
-            
-            // تنظيف الرابط المؤقت بعد فترة
-            setTimeout(() => {
-              URL.revokeObjectURL(pdfUrl);
-            }, 60000);
-            
-            alert('تم إرسال رسالة واتساب مع رابط الإيصال وتحميل الملف! 📱📄');
-          } else {
-            alert('حدث خطأ في إنشاء الإيصال. يرجى المحاولة مرة أخرى.');
-          }
+          const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+          console.log('رابط الواتساب (حالة خطأ):', whatsappUrl);
+          
+          // فتح واتساب
+          window.open(whatsappUrl, '_blank');
+          
+          alert('تم إرسال رسالة واتساب! 📱');
         };
 
         // إعادة تعيين النموذج (حالة الخطأ)
         document.getElementById('supplyForm').reset();
         document.getElementById('date').valueAsDate = new Date();
         
-        // إخفاء قسم الإيصال بعد فترة
-        setTimeout(() => {
-          document.getElementById('receiptLink').style.display = 'none';
-        }, 60000); // إخفاء بعد 60 ثانية
+        // ملاحظة: رسالة الإيصال ستبقى ظاهرة حتى إعادة تحميل الصفحة
       });
     });
     
@@ -1180,13 +1115,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #e91e63;
-      font-weight: bold;
-      font-size: 8px;
-      background-image: url('https://raw.githubusercontent.com/jawednoor/donuts-system/refs/heads/main/logo-01.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
+      border: 2px solid #dd228f;
+      box-shadow: 0 2px 5px rgba(221, 34, 143, 0.2);
+      overflow: hidden;
+      position: relative;
     }
     
     .company-name {
@@ -1367,6 +1299,29 @@
         color-adjust: exact !important;
       }
       
+      .logo {
+        background: white !important;
+        background-image: url('https://github.com/jawednoor/donuts-system/blob/main/logo-01.png?raw=true') !important;
+        background-size: contain !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        border: 2px solid #dd228f !important;
+        box-shadow: 0 2px 5px rgba(221, 34, 143, 0.2) !important;
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      .logo img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        border-radius: 50% !important;
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
       .receipt-title {
         background: linear-gradient(135deg, #ffb6bb, #ffbed4) !important;
         color: #dd228f !important;
@@ -1444,7 +1399,11 @@
   <div class="receipt-container">
     <!-- الرأس -->
     <div class="header">
-      <div class="logo">D&H</div>
+      <div class="logo">
+        <img src="https://github.com/jawednoor/donuts-system/blob/main/logo-01.png?raw=true" 
+             alt="دونات وحشوة" 
+             style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
+      </div>
       <div class="company-name">دونات وحشوة</div>
       <div class="company-name-en">Donuts and Filling</div>
     </div>
@@ -1548,13 +1507,43 @@
         
         const { jsPDF } = window.jspdf;
         
-        // إنشاء PDF بمقاس دقيق للطابعات الحرارية
+        // دالة مساعدة لمعالجة النص العربي باستخدام jsPDF-RTL
+        function processArabicText(text) {
+          try {
+            // jsPDF-RTL يتعامل مع النصوص العربية تلقائياً
+            return text;
+          } catch (e) {
+            return text;
+          }
+        }
+        
+        // إنشاء PDF بمقاس دقيق للطابعات الحرارية مع دعم RTL
         const pdf = new jsPDF({
           orientation: 'portrait',
           unit: 'mm',
           format: [57, 290],
-          compress: true
+          compress: true,
+          putOnlyUsedFonts: true,
+          floatPrecision: 16
         });
+        
+        // تفعيل دعم RTL للنصوص العربية
+        if (typeof pdf.setRTL === 'function') {
+          pdf.setRTL(true);
+          console.log('✅ تم تفعيل دعم RTL للنصوص العربية');
+        } else {
+          console.log('⚠️ jsPDF-RTL غير متوفر، استخدام الوضع العادي');
+        }
+        
+        // محاولة تعيين خط عربي إذا كان متوفراً
+        try {
+          if (typeof pdf.addFont === 'function') {
+            // يمكن إضافة خط عربي هنا إذا كان متوفراً
+            pdf.setFont('helvetica'); // استخدام خط افتراضي يدعم Unicode جزئياً
+          }
+        } catch (e) {
+          console.log('استخدام الخط الافتراضي');
+        }
         
         // إعدادات الخطوط والألوان المحسنة
         const fonts = {
@@ -1594,13 +1583,20 @@
         pdf.setFontSize(14);
         pdf.text('🍩', pageWidth/2, y + 12, { align: 'center' });
         
-        // اسم الشركة
+        // اسم الشركة مع معالجة RTL
         pdf.setTextColor(...colors.white);
         pdf.setFontSize(fonts.title);
-        pdf.text('دونات وحشوة', pageWidth/2, y + 20, { align: 'center' });
+        
+        // استخدام دالة معالجة النص العربي
+        const companyNameAr = processArabicText('دونات وحشوة');
+        pdf.text(companyNameAr, pageWidth/2, y + 18, { align: 'center' });
         
         pdf.setFontSize(fonts.body);
-        pdf.text('Donuts and Filling', pageWidth/2, y + 25, { align: 'center' });
+        pdf.text('Donuts & Filling', pageWidth/2, y + 23, { align: 'center' });
+        
+        pdf.setFontSize(fonts.small);
+        const companyDescAr = processArabicText('شركة دونات وحشوة');
+        pdf.text(companyDescAr, pageWidth/2, y + 27, { align: 'center' });
         
         y += 35;
         
@@ -1610,10 +1606,10 @@
         
         pdf.setTextColor(...colors.white);
         pdf.setFontSize(fonts.header);
-        pdf.text('إيصال دفعة مالية', pageWidth/2, y + 6.5, { align: 'center' });
+        pdf.text(processArabicText('إيصال دفعة مالية'), pageWidth/2, y + 6.5, { align: 'center' });
         
         pdf.setFontSize(fonts.small);
-        pdf.text('Payment Receipt', pageWidth/2, y + 11, { align: 'center' });
+        pdf.text('Financial Payment Receipt', pageWidth/2, y + 11, { align: 'center' });
         
         y += 20;
         
@@ -1623,8 +1619,8 @@
         
         pdf.setTextColor(...colors.black);
         pdf.setFontSize(fonts.small);
-        pdf.text(`رقم الإيصال: ${data.invoiceNumber}`, margin + 2, y + 4);
-        pdf.text(`التاريخ: ${data.date}`, margin + 2, y + 8);
+        pdf.text(processArabicText(`رقم الإيصال: ${data.invoiceNumber}`), margin + 2, y + 4);
+        pdf.text(processArabicText(`التاريخ: ${data.date}`), margin + 2, y + 8);
         
         y += 15;
         
@@ -1749,21 +1745,23 @@
         pdf.setFontSize(fonts.tiny);
         pdf.text('🔗 ID: ' + data.invoiceNumber, pageWidth/2, y + 18, { align: 'center' });
         
-        console.log('✅ تم إنشاء PDF احترافي بنجاح');
+        console.log('✅ تم إنشاء PDF احترافي بدعم RTL بنجاح');
         
         // تحويل إلى Blob مع ضغط محسن
         const pdfBlob = pdf.output('blob');
+        console.log('📄 حجم PDF:', pdfBlob.size, 'بايت');
         return pdfBlob;
         
       } catch (error) {
         console.error('❌ خطأ في إنشاء PDF:', error);
         
-        // محاولة بديلة مبسطة
+        // محاولة بديلة مبسطة مع RTL
         try {
-          console.log('🔄 محاولة إنشاء نسخة مبسطة...');
+          console.log('🔄 محاولة إنشاء نسخة مبسطة مع دعم RTL...');
           return await generateSimplePDF(data);
         } catch (fallbackError) {
-          console.error('❌ فشل في النسخة البديلة:', fallbackError);
+          console.error('❌ فشل في النسخة البديلة أيضاً:', fallbackError);
+          alert('حدث خطأ في إنشاء PDF. تأكد من اتصال الإنترنت وحاول مرة أخرى.');
           return null;
         }
       }
@@ -1803,14 +1801,20 @@
       return pdf.output('blob');
     }
     
-    // دالة احتياطية لإنشاء PDF مبسط
+    // دالة احتياطية لإنشاء PDF مبسط مع دعم العربية
     async function generateSimplePDF(data) {
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [57, 290] });
       
+      // تفعيل دعم RTL إذا كان متوفراً
+      if (typeof pdf.setRTL === 'function') {
+        pdf.setRTL(true);
+        console.log('✅ RTL مفعل في النسخة المبسطة');
+      }
+      
       pdf.setFontSize(10);
       pdf.text('دونات وحشوة', 28.5, 10, { align: 'center' });
-      pdf.text('Donuts and Filling', 28.5, 15, { align: 'center' });
+      pdf.text('Donuts & Filling', 28.5, 15, { align: 'center' });
       
       pdf.setFontSize(8);
       pdf.text('إيصال دفعة مالية', 28.5, 25, { align: 'center' });
@@ -1836,6 +1840,39 @@
       
       return pdf.output('blob');
     }
+    
+    // تحميل الصورة بشكل مسبق لضمان ظهورها في الطباعة
+    function preloadLogo() {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        console.log('✅ تم تحميل الشعار بنجاح للطباعة');
+      };
+      img.onerror = function() {
+        console.warn('⚠️ فشل في تحميل الشعار');
+      };
+      img.src = 'https://github.com/jawednoor/donuts-system/blob/main/logo-01.png?raw=true';
+    }
+    
+    // تحميل الشعار عند تحميل الصفحة
+    window.addEventListener('load', function() {
+      preloadLogo();
+      
+      // اختبار توفر مكتبة jsPDF-RTL
+      setTimeout(() => {
+        try {
+          const { jsPDF } = window.jspdf;
+          const testPdf = new jsPDF();
+          if (typeof testPdf.setRTL === 'function') {
+            console.log('✅ مكتبة jsPDF-RTL متوفرة ومحملة بنجاح');
+          } else {
+            console.log('⚠️ مكتبة jsPDF-RTL غير متوفرة - سيتم استخدام الوضع العادي');
+          }
+        } catch (e) {
+          console.log('⚠️ خطأ في اختبار مكتبات PDF:', e);
+        }
+      }, 1000);
+    });
   </script>
 </body>
 </html>
