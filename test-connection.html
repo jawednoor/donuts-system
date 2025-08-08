@@ -202,6 +202,13 @@
     <img src="logo-01.png" alt="شعار دونات وحشوة" class="logo">
     <h1>🧪 اختبار الاتصال مع Google Apps Script</h1>
     
+    <div style="background: #e3f2fd; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; text-align: right;">
+      <strong>📋 معلومات الاختبار:</strong><br>
+      <small>• الهدف: شيت "payments" في Google Sheets</small><br>
+      <small>• نوع البيانات: payment</small><br>
+      <small>• سيتم إضافة صف جديد في شيت الدفعات</small>
+    </div>
+    
     <form class="test-form" id="testForm">
       <div class="form-group">
         <label for="testCustomer">اسم العميل (للاختبار):</label>
@@ -313,6 +320,7 @@
           <div class="status-indicator status-success"></div>
           <strong>✅ نجح الاختبار!</strong><br>
           تم إرسال البيانات بنجاح إلى Google Apps Script<br>
+          <strong>📊 تحقق من شيت "payments" في Google Sheets</strong><br>
           <small>مدة الاستجابة: ${duration}ms</small><br>
           <small>الوقت: ${new Date().toLocaleString('ar-SA')}</small>
         `;
@@ -343,6 +351,8 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🧪 صفحة اختبار الاتصال جاهزة');
       console.log('🔗 Google Apps Script URL:', 'AKfycby9A3DooXLq9-Y7q2qtUcY2WPAgs9qF_HAujPCeYFFviLLMAc0GWAiGF0_OjnGQTHbTQA');
+      console.log('📊 الهدف: شيت "payments" في Google Sheets');
+      console.log('📝 نوع البيانات: payment');
     });
   </script>
 </body>
