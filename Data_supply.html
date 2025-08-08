@@ -632,6 +632,99 @@
         justify-content: center;
       }
     }
+
+    /* Classes المساعدة */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Loading Screen مع رسائل الاستغفار */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+
+    .loading-overlay:not(.hidden) {
+      display: flex;
+    }
+
+    .loading-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #e91e63;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .istighfar-text {
+      font-size: 16px;
+      color: #e91e63;
+      margin-bottom: 10px;
+      font-weight: 600;
+      opacity: 0;
+      animation: fadeInOut 3s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0; transform: translateY(10px); }
+      50% { opacity: 1; transform: translateY(0); }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(45deg, #e91e63, #ffb6c1);
+      border-radius: 3px;
+      width: 0%;
+      animation: fillProgress 5s ease-in-out infinite;
+    }
+
+    @keyframes fillProgress {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -728,6 +821,23 @@
       // محاولة جلب البيانات من Google Sheets
       tryLoadFromGoogleSheets();
     }
+
+    // نسخة async لـ loadCustomers
+    function loadCustomersAsync() {
+      return new Promise((resolve, reject) => {
+        const customerSel = document.getElementById('customer');
+        
+        // إضافة خيار فارغ أولاً
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'اختر العميل';
+        emptyOption.selected = true;
+        customerSel.appendChild(emptyOption);
+        
+        // محاولة جلب البيانات من Google Sheets
+        tryLoadFromGoogleSheetsAsync().then(resolve).catch(reject);
+      });
+    }
     
     // محاولة جلب البيانات من Google Sheets المشارك
     function tryLoadFromGoogleSheets() {
@@ -783,13 +893,110 @@
           console.log('تم تحديث البيانات من Google Sheets:', uniqueCustomers.size, 'عميل فريد');
           
           if (customerSel.options.length > 1) {
-            alert('تم تحميل بيانات العملاء الحديثة من Google Sheets بنجاح!');
+            // عرض رسالة نجاح مؤقتة خضراء
+            const successMessage = document.createElement('div');
+            successMessage.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: #28a745;
+              color: white;
+              padding: 10px 20px;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              z-index: 1000;
+              font-size: 14px;
+            `;
+            successMessage.textContent = `✅ تم تحميل ${uniqueCustomers.size} عميل من قاعدة البيانات`;
+            document.body.appendChild(successMessage);
+            
+            // إزالة الرسالة بعد 3 ثوان
+            setTimeout(() => {
+              if (document.body.contains(successMessage)) {
+                document.body.removeChild(successMessage);
+              }
+            }, 3000);
           }
         })
         .catch(err => {
           console.error('خطأ في جلب البيانات من Google Sheets:', err);
           console.log('استخدام البيانات الاحتياطية');
         });
+    }
+
+    // نسخة async من tryLoadFromGoogleSheets
+    function tryLoadFromGoogleSheetsAsync() {
+      return new Promise((resolve, reject) => {
+        // استخدام رابط CSV مباشر للشيت المشارك
+        const CUSTOMER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1POl2ntUZL9x0n79Wr1_ZswEETSFUrgjMrXcFtDfoFqA/export?format=csv&gid=0';
+        
+        fetch(CUSTOMER_SHEET_URL)
+          .then(res => res.text())
+          .then(csvData => {
+            console.log('تم الاتصال بـ Google Sheets بنجاح');
+            console.log('CSV Data:', csvData.substring(0, 200) + '...'); // عرض أول 200 حرف للتشخيص
+            
+            const lines = csvData.split('\n');
+            const customerSel = document.getElementById('customer');
+            const uniqueCustomers = new Set(); // لتجنب التكرار
+            
+            // معالجة البيانات من CSV
+            lines.forEach((line, index) => {
+              if (index === 0) return; // تجاهل العنوان
+              
+              const columns = line.split(',');
+              if (columns.length >= 2) {
+                const customerName = columns[1].trim().replace(/"/g, ''); // العمود B
+                if (customerName && customerName !== 'العميل') {
+                  uniqueCustomers.add(customerName);
+                }
+              }
+            });
+            
+            // إضافة العملاء الفريدين
+            uniqueCustomers.forEach(customer => {
+              const opt = document.createElement('option');
+              opt.value = customer;
+              opt.textContent = customer;
+              customerSel.appendChild(opt);
+            });
+            
+            console.log('تم تحديث البيانات من Google Sheets:', uniqueCustomers.size, 'عميل فريد');
+            
+            if (customerSel.options.length > 1) {
+              // عرض رسالة نجاح مؤقتة خضراء
+              const successMessage = document.createElement('div');
+              successMessage.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 1000;
+                font-size: 14px;
+              `;
+              successMessage.textContent = `✅ تم تحميل ${uniqueCustomers.size} عميل من قاعدة البيانات`;
+              document.body.appendChild(successMessage);
+              
+              // إزالة الرسالة بعد 3 ثوان
+              setTimeout(() => {
+                if (document.body.contains(successMessage)) {
+                  document.body.removeChild(successMessage);
+                }
+              }, 3000);
+            }
+            
+            resolve();
+          })
+          .catch(err => {
+            console.error('خطأ في جلب البيانات من Google Sheets:', err);
+            console.log('استخدام البيانات الاحتياطية');
+            reject(err);
+          });
+      });
     }
     
     // تحميل الأصناف من Google Sheets نفس الشيت Customer
@@ -816,6 +1023,39 @@
       
       // محاولة جلب الأصناف من Google Sheets
       tryLoadProductsFromGoogleSheets();
+    }
+
+    // نسخة async لـ loadProducts
+    function loadProductsAsync() {
+      return new Promise((resolve) => {
+        // أصناف احتياطية
+        const backupProducts = ['دونات محشية', 'سينابون', 'كوكيز'];
+        const productSel = document.getElementById('product');
+        
+        // إضافة خيار فارغ أولاً
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'اختر الصنف';
+        productSel.appendChild(emptyOption);
+        
+        // إضافة الأصناف الاحتياطية أولاً
+        backupProducts.forEach(product => {
+          const opt = document.createElement('option');
+          opt.value = product;
+          opt.textContent = product;
+          productSel.appendChild(opt);
+        });
+        
+        console.log('تم تحميل الأصناف الاحتياطية:', backupProducts.length, 'صنف');
+        
+        // محاولة جلب الأصناف من Google Sheets
+        tryLoadProductsFromGoogleSheets();
+        
+        // تأخير بسيط ثم resolve
+        setTimeout(() => {
+          resolve();
+        }, 500);
+      });
     }
     
     // جلب الأصناف من Google Sheets
@@ -870,7 +1110,30 @@
             });
             
             console.log('تم تحديث الأصناف من Google Sheets:', uniqueProducts.size, 'صنف فريد');
-            alert('تم تحميل الأصناف من Google Sheets بنجاح!');
+            
+            // عرض رسالة نجاح مؤقتة خضراء للأصناف
+            const successMessage = document.createElement('div');
+            successMessage.style.cssText = `
+              position: fixed;
+              top: 60px;
+              right: 20px;
+              background: #28a745;
+              color: white;
+              padding: 10px 20px;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              z-index: 1000;
+              font-size: 14px;
+            `;
+            successMessage.textContent = `✅ تم تحميل ${uniqueProducts.size} صنف من قاعدة البيانات`;
+            document.body.appendChild(successMessage);
+            
+            // إزالة الرسالة بعد 3 ثوان
+            setTimeout(() => {
+              if (document.body.contains(successMessage)) {
+                document.body.removeChild(successMessage);
+              }
+            }, 3000);
           }
         })
         .catch(err => {
@@ -878,10 +1141,70 @@
           console.log('استخدام الأصناف الاحتياطية');
         });
     }
-    
+
+    // Loading Screen مع رسائل الاستغفار
+    function showLoadingScreen() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+        loadingOverlay.style.display = 'flex';
+        
+        // مصفوفة رسائل الاستغفار
+        const istighfarMessages = [
+          'أستغفر الله العظيم',
+          'استغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه',
+          'لا إله إلا أنت سبحانك إني كنت من الظالمين',
+          'سبحان الله وبحمده سبحان الله العظيم',
+          'اللهم صل وسلم على نبينا محمد',
+          'لا حول ولا قوة إلا بالله',
+          'حسبنا الله ونعم الوكيل',
+          'اللهم أعني ولا تعن علي',
+          'رب اغفر لي ذنبي وخطئي وجهلي',
+          'اللهم بارك لنا فيما رزقتنا'
+        ];
+        
+        let currentMessageIndex = 0;
+        const istighfarText = document.getElementById('istighfarText');
+        
+        // تغيير الرسالة كل 2 ثانية
+        window.istighfarInterval = setInterval(() => {
+          currentMessageIndex = (currentMessageIndex + 1) % istighfarMessages.length;
+          if (istighfarText) {
+            istighfarText.textContent = istighfarMessages[currentMessageIndex];
+          }
+        }, 2000);
+      }
+    }
+
+    function hideLoadingScreen() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) {
+        loadingOverlay.classList.add('hidden');
+        loadingOverlay.style.display = 'none';
+        
+        // إيقاف تغيير رسائل الاستغفار
+        if (window.istighfarInterval) {
+          clearInterval(window.istighfarInterval);
+          window.istighfarInterval = null;
+        }
+      }
+    }
+
     // استدعاء دوال التحميل
-    loadCustomers();
-    loadProducts();
+    // عرض Loading Screen أثناء تحميل البيانات
+    showLoadingScreen();
+    
+    // تحميل البيانات بشكل متوازي
+    Promise.all([
+      loadCustomersAsync(),
+      loadProductsAsync()
+    ]).then(() => {
+      // إخفاء Loading Screen بعد انتهاء التحميل
+      hideLoadingScreen();
+    }).catch(() => {
+      // إخفاء Loading Screen حتى في حالة الخطأ
+      hideLoadingScreen();
+    });
     
     // تعيين تاريخ اليوم تلقائياً
     document.getElementById('date').valueAsDate = new Date();
@@ -889,6 +1212,9 @@
     document.getElementById('supplyForm').addEventListener('submit', function(e) {
       e.preventDefault();
       console.log('تم الضغط على زر الإرسال!');
+      
+      // عرض Loading Screen
+      showLoadingScreen();
       
       // جمع البيانات
       const customer = document.getElementById('customer').value;
@@ -902,21 +1228,25 @@
 
       // التحقق من صحة البيانات
       if (!customer) {
+        hideLoadingScreen();
         alert('يرجى اختيار العميل');
         console.log('خطأ: لم يتم اختيار العميل');
         return;
       }
       if (!mobile || !mobile.match(/^05[0-9]{8}$/)) {
+        hideLoadingScreen();
         alert('يرجى إدخال رقم جوال صحيح (يبدأ بـ 05 ويتكون من 10 أرقام)');
         console.log('خطأ: رقم الجوال غير صحيح:', mobile);
         return;
       }
       if (!date) {
+        hideLoadingScreen();
         alert('يرجى اختيار التاريخ');
         console.log('خطأ: لم يتم اختيار التاريخ');
         return;
       }
       if (!product) {
+        hideLoadingScreen();
         alert('يرجى اختيار الصنف');
         console.log('خطأ: لم يتم اختيار الصنف');
         return;
@@ -967,6 +1297,9 @@
         document.getElementById('whatsappUrl').href = whatsappUrl;
         document.getElementById('whatsappLink').style.display = 'block';
         
+        // إخفاء Loading Screen
+        hideLoadingScreen();
+        
         // إضافة تأخير صغير قبل فتح واتساب
         setTimeout(() => {
           window.open(whatsappUrl, '_blank');
@@ -978,6 +1311,10 @@
       })
       .catch(err => {
         console.error('خطأ في إرسال البيانات:', err);
+        
+        // إخفاء Loading Screen
+        hideLoadingScreen();
+        
         alert('حدث خطأ في تسجيل البيانات. سيتم فتح واتساب على أي حال...');
         
         // حتى لو فشل التسجيل، سنفتح واتساب
@@ -1004,5 +1341,17 @@
       });
     });
   </script>
+
+  <!-- Loading Screen مع رسائل الاستغفار -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">جاري إرسال التوريد...</div>
+      <div class="istighfar-text" id="istighfarText">أستغفر الله العظيم</div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
