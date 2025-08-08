@@ -637,9 +637,164 @@
       box-shadow: 0 0 0 3px rgba(216, 19, 137, 0.1);
       background: white;
     }
+
+    /* Classes المساعدة */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Loading Screen مع رسائل الاستغفار */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+
+    .loading-overlay:not(.hidden) {
+      display: flex;
+    }
+
+    .loading-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #e91e63;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .istighfar-text {
+      font-size: 16px;
+      color: #e91e63;
+      margin-bottom: 10px;
+      font-weight: 600;
+      opacity: 0;
+      animation: fadeInOut 3s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0; transform: translateY(10px); }
+      50% { opacity: 1; transform: translateY(0); }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(45deg, #e91e63, #ffb6c1);
+      border-radius: 3px;
+      width: 0%;
+      animation: fillProgress 5s ease-in-out infinite;
+    }
+
+    @keyframes fillProgress {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    /* نظام الإشعارات الخضراء */
+    .notifications-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      max-width: 400px;
+      pointer-events: none;
+    }
+
+    .notification {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      padding: 16px 24px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+      font-size: 16px;
+      font-weight: 500;
+      border-right: 5px solid #2E7D32;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      text-align: right;
+      direction: rtl;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .notification.error {
+      background: linear-gradient(135deg, #f44336, #d32f2f);
+      border-right-color: #b71c1c;
+      box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .notification.hiding {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    @media (max-width: 768px) {
+      .notifications-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+      
+      .notification {
+        font-size: 14px;
+        padding: 12px 16px;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- حاوية الإشعارات -->
+  <div class="notifications-container" id="notifications-container"></div>
+
   <!-- الشعار ومسمى الصفحة خارج الحاوية -->
   <div class="page-header">
     <img src="logo-01.png" alt="شعار دونات وحشوة" class="page-logo">
@@ -712,6 +867,107 @@
   </footer>
 
   <script>
+    // Loading Screen مع رسائل الاستغفار
+    function showLoadingScreen() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+        loadingOverlay.style.display = 'flex';
+        
+        // مصفوفة رسائل الاستغفار
+        const istighfarMessages = [
+          'أستغفر الله العظيم',
+          'استغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه',
+          'لا إله إلا أنت سبحانك إني كنت من الظالمين',
+          'سبحان الله وبحمده سبحان الله العظيم',
+          'اللهم صل وسلم على نبينا محمد',
+          'لا حول ولا قوة إلا بالله',
+          'حسبنا الله ونعم الوكيل',
+          'اللهم أعني ولا تعن علي',
+          'رب اغفر لي ذنبي وخطئي وجهلي',
+          'اللهم بارك لنا فيما رزقتنا'
+        ];
+        
+        let currentMessageIndex = 0;
+        const istighfarText = document.getElementById('istighfarText');
+        
+        // تغيير الرسالة كل 2 ثانية
+        window.istighfarInterval = setInterval(() => {
+          currentMessageIndex = (currentMessageIndex + 1) % istighfarMessages.length;
+          if (istighfarText) {
+            istighfarText.textContent = istighfarMessages[currentMessageIndex];
+          }
+        }, 2000);
+      }
+    }
+
+    function hideLoadingScreen() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) {
+        loadingOverlay.classList.add('hidden');
+        loadingOverlay.style.display = 'none';
+        
+        // إيقاف تغيير رسائل الاستغفار
+        if (window.istighfarInterval) {
+          clearInterval(window.istighfarInterval);
+          window.istighfarInterval = null;
+        }
+      }
+    }
+
+    // دالة إظهار الإشعارات الخضراء
+    function showNotification(message, type = 'success') {
+      const container = document.getElementById('notifications-container');
+      if (!container) return;
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      
+      container.appendChild(notification);
+      
+      // إظهار الإشعار مع تأثير الانزلاق
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 100);
+      
+      // إخفاء الإشعار بعد 3 ثوان
+      setTimeout(() => {
+        notification.classList.add('hiding');
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // نظام الإشعارات الخضراء
+    function showNotification(message, type = 'success') {
+      const container = document.getElementById('notifications-container');
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      
+      container.appendChild(notification);
+      
+      // إظهار الإشعار مع تأثير الانزلاق
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 100);
+      
+      // إخفاء الإشعار بعد 3 ثوان
+      setTimeout(() => {
+        notification.classList.add('hiding');
+        setTimeout(() => {
+          if (container.contains(notification)) {
+            container.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
+    }
+
     // جلب بيانات العملاء من Google Sheets (نفس Data_supply.html)
     function loadCustomers() {
       const customerSel = document.getElementById('customer');
@@ -781,7 +1037,29 @@
           console.log('تم تحديث البيانات من Google Sheets:', uniqueCustomers.size, 'عميل فريد');
           
           if (customerSel.options.length > 1) {
-            alert('تم تحميل بيانات العملاء الحديثة من Google Sheets بنجاح!');
+            // عرض رسالة نجاح مؤقتة خضراء
+            const successMessage = document.createElement('div');
+            successMessage.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: #28a745;
+              color: white;
+              padding: 10px 20px;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              z-index: 1000;
+              font-size: 14px;
+            `;
+            successMessage.textContent = `✅ تم تحميل ${uniqueCustomers.size} عميل من قاعدة البيانات`;
+            document.body.appendChild(successMessage);
+            
+            // إزالة الرسالة بعد 3 ثوان
+            setTimeout(() => {
+              if (document.body.contains(successMessage)) {
+                document.body.removeChild(successMessage);
+              }
+            }, 3000);
           }
         })
         .catch(err => {
@@ -790,8 +1068,17 @@
         });
     }
     
-    // استدعاء دالة التحميل
-    loadCustomers();
+    // استدعاء دالة التحميل مع Loading Screen
+    showLoadingScreen();
+    
+    // تحميل البيانات مع Promise
+    new Promise((resolve) => {
+      loadCustomers();
+      // تأخير بسيط للسماح بتحميل البيانات
+      setTimeout(resolve, 2000);
+    }).then(() => {
+      hideLoadingScreen();
+    });
     
     // تعيين تاريخ اليوم تلقائياً (نفس Data_supply.html)
     document.getElementById('date').valueAsDate = new Date();
@@ -800,6 +1087,9 @@
     document.getElementById('supplyForm').addEventListener('submit', function(e) {
       e.preventDefault();
       console.log('تم الضغط على زر الإرسال!');
+      
+      // عرض Loading Screen
+      showLoadingScreen();
       
       // جمع البيانات
       const customer = document.getElementById('customer').value;
@@ -814,53 +1104,59 @@
 
       // التحقق من صحة البيانات
       if (!customer) {
-        alert('يرجى اختيار العميل');
+        hideLoadingScreen();
+        showNotification('⚠️ يرجى اختيار العميل', 'error');
         console.log('خطأ: لم يتم اختيار العميل');
         return;
       }
       if (!date) {
-        alert('يرجى اختيار التاريخ');
+        hideLoadingScreen();
+        showNotification('⚠️ يرجى اختيار التاريخ', 'error');
         console.log('خطأ: لم يتم اختيار التاريخ');
         return;
       }
       if (!amount || amount <= 0) {
-        alert('يرجى إدخال مبلغ صحيح');
+        hideLoadingScreen();
+        showNotification('⚠️ يرجى إدخال مبلغ صحيح', 'error');
         console.log('خطأ: المبلغ غير صحيح:', amount);
         return;
       }
       if (!invoiceNumber) {
-        alert('يرجى إدخال رقم الفاتورة');
+        hideLoadingScreen();
+        showNotification('⚠️ يرجى إدخال رقم الفاتورة', 'error');
         console.log('خطأ: لم يتم إدخال رقم الفاتورة');
         return;
       }
       if (!paymentMethod) {
-        alert('يرجى اختيار طريقة الدفع');
+        hideLoadingScreen();
+        showNotification('⚠️ يرجى اختيار طريقة الدفع', 'error');
         console.log('خطأ: لم يتم اختيار طريقة الدفع');
         return;
       }
       if (!mobile || !mobile.match(/^05[0-9]{8}$/)) {
-        alert('يرجى إدخال رقم جوال صحيح (يبدأ بـ 05 ويتكون من 10 أرقام)');
+        hideLoadingScreen();
+        showNotification('⚠️ يرجى إدخال رقم جوال صحيح (يبدأ بـ 05 ويتكون من 10 أرقام)', 'error');
         console.log('خطأ: رقم الجوال غير صحيح:', mobile);
         return;
       }
 
       console.log('جميع البيانات صحيحة، سيتم الإرسال...');
 
-      // إرسال البيانات إلى Google Apps Script
+      // إرسال البيانات إلى Google Apps Script للدفعات
       const data = { 
+        type: 'payment',     // مهم جداً - يجب أن يكون payment
         customer: customer,
         date: date,
-        amount: amount,
+        amount: parseFloat(amount),  // تأكد من أنه رقم
         invoiceNumber: invoiceNumber,
         paymentMethod: paymentMethod,
         mobile: mobile,
-        notes: notes || '',
-        type: 'payment'
+        notes: notes || ''
       };
-      console.log('إرسال البيانات:', data);
+      console.log('إرسال البيانات للدفعات:', data);
 
-      // إرسال البيانات إلى Google Sheets
-      fetch('https://script.google.com/macros/s/AKfycbyvo3ExVKbjmoCw2Nmgywep4IPEgQzl6y7zpt_HMFd8RBpXBRZGIiQ9WC0Nhl78byDS9Q/exec', {
+      // إرسال البيانات إلى Google Sheets - شيت payments
+      fetch('https://script.google.com/macros/s/AKfycbw-d7nT8o1_eTvWzvpcBrDPBI2fvCG4kx7bFe3mguQxajnLSn4R7093elLkn9MQv2fefw/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
@@ -868,7 +1164,12 @@
       })
       .then(() => {
         console.log('تم إرسال البيانات إلى Google Sheets بنجاح');
-        alert('تم تسجيل الدفعة بنجاح في Google Sheets!');
+        
+        // إخفاء Loading Screen قبل إظهار الإشعار
+        hideLoadingScreen();
+        
+        // إظهار إشعار نجاح بدلاً من alert
+        showNotification('✅ تم تسجيل الدفعة بنجاح في Google Sheets!', 'success');
 
         // بعد نجاح التسجيل، توليد رابط واتساب
         const phone = '966' + mobile.slice(1);
@@ -904,7 +1205,12 @@
       })
       .catch(err => {
         console.error('خطأ في إرسال البيانات:', err);
-        alert('حدث خطأ في تسجيل البيانات. سيتم فتح واتساب على أي حال...');
+        
+        // إخفاء Loading Screen في حالة الخطأ
+        hideLoadingScreen();
+        
+        // إظهار إشعار خطأ بدلاً من التنبيه المنبثق
+        showNotification('⚠️ حدث خطأ في تسجيل البيانات. سيتم فتح واتساب على أي حال...', 'error');
         
         // حتى لو فشل التسجيل، سنفتح واتساب
         const phone = '966' + mobile.slice(1);
@@ -933,5 +1239,17 @@
       });
     });
   </script>
+
+  <!-- Loading Screen مع رسائل الاستغفار -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">جاري حفظ الدفعة...</div>
+      <div class="istighfar-text" id="istighfarText">أستغفر الله العظيم</div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
