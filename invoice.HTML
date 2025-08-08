@@ -393,6 +393,44 @@
             box-shadow: 0 7px 20px rgba(221, 34, 143, 0.4);
         }
 
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .home-btn {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(108, 117, 125, 0.4);
+        }
+
         /* نموذج إدخال البيانات */
         .input-form {
             background: white;
@@ -556,10 +594,22 @@
 
         .item-input-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto auto;
+            grid-template-columns: 2fr auto auto auto;
             gap: 10px;
             align-items: end;
             margin-bottom: 10px;
+        }
+
+        /* تجميع الكمية والسعر */
+        .quantity-price-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .quantity-price-group .form-input {
+            flex: 1;
+            min-width: 80px;
         }
 
         @media (max-width: 768px) {
@@ -567,6 +617,15 @@
                 grid-template-columns: 1fr;
                 gap: 8px;
                 margin-bottom: 15px;
+            }
+            
+            .quantity-price-group {
+                flex-direction: row;
+                gap: 8px;
+            }
+            
+            .quantity-price-group .form-input {
+                min-width: 70px;
             }
         }
 
@@ -650,7 +709,7 @@
             font-size: 12px;
         }
 
-        .generate-btn, .print-btn {
+        .generate-btn, .print-btn, .whatsapp-btn, .home-btn {
             background: linear-gradient(135deg, #dd228f, #ffb6bb);
             color: white;
             padding: 15px 40px;
@@ -667,7 +726,7 @@
         }
 
         @media (max-width: 768px) {
-            .generate-btn, .print-btn {
+            .generate-btn, .print-btn, .whatsapp-btn, .home-btn {
                 padding: 12px 20px;
                 font-size: 16px;
                 margin: 15px auto;
@@ -677,14 +736,14 @@
         }
 
         @media (max-width: 480px) {
-            .generate-btn, .print-btn {
+            .generate-btn, .print-btn, .whatsapp-btn, .home-btn {
                 padding: 10px 15px;
                 font-size: 14px;
                 margin: 10px auto;
             }
         }
 
-        .generate-btn:hover, .print-btn:hover {
+        .generate-btn:hover, .print-btn:hover, .whatsapp-btn:hover, .home-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 7px 20px rgba(221, 34, 143, 0.4);
         }
@@ -888,7 +947,7 @@
                 display: none !important;
             }
             
-            .print-btn, .generate-btn, #saveBtn, #newInvoiceBtn {
+            .print-btn, .generate-btn, #saveBtn, #newInvoiceBtn, .whatsapp-btn, #whatsappBtn, .home-btn, #homeBtn {
                 display: none !important;
             }
             
@@ -1260,17 +1319,19 @@
                 
                 <div class="form-group">
                     <label class="form-label">اسم العميل *</label>
-                    <input type="text" class="form-input" id="customerName" required>
+                    <select class="form-input" id="customerName" required>
+                        <option value="">اختر العميل...</option>
+                    </select>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">العنوان</label>
-                    <input type="text" class="form-input" id="customerAddress" placeholder="عنوان العميل">
+                    <input type="text" class="form-input" id="customerAddress" placeholder="سيتم ملؤه تلقائياً من قاعدة البيانات" readonly style="background: #f8f9fa;">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">الرقم الضريبي للعميل</label>
-                    <input type="text" class="form-input" id="customerVAT" placeholder="اختياري">
+                    <input type="text" class="form-input" id="customerVAT" placeholder="سيتم ملؤه تلقائياً من قاعدة البيانات" readonly style="background: #f8f9fa;">
                 </div>
             </div>
 
@@ -1278,9 +1339,13 @@
                 <div class="items-input-title">أصناف الفاتورة</div>
                 <div id="itemsContainer">
                     <div class="item-input-row">
-                        <input type="text" class="form-input" placeholder="اسم الصنف" required>
-                        <input type="number" class="form-input" placeholder="الكمية" min="1" step="1" required>
-                        <input type="number" class="form-input" placeholder="السعر" min="0" step="0.01" required>
+                        <select class="form-input" placeholder="اختر الصنف..." required>
+                            <option value="">اختر الصنف...</option>
+                        </select>
+                        <div class="quantity-price-group">
+                            <input type="number" class="form-input" placeholder="الكمية" min="1" step="1" required>
+                            <input type="number" class="form-input" placeholder="السعر" min="0" step="0.01" required>
+                        </div>
                         <div class="vat-checkbox-container">
                             <input type="checkbox" class="vat-checkbox" id="vatIncluded_1" title="شامل الضريبة">
                             <label for="vatIncluded_1" class="vat-checkbox-label">شامل الضريبة</label>
@@ -1437,12 +1502,15 @@
     <div style="text-align: center; margin: 20px;">
         <button class="print-btn hidden" id="printBtn" onclick="printThermalInvoice()">طباعة حرارية (57mm)</button>
         <button class="generate-btn hidden" id="newInvoiceBtn" onclick="createNewInvoice()">فاتورة جديدة</button>
+        <button class="whatsapp-btn hidden" id="whatsappBtn" onclick="sendWhatsAppMessage()">📱 إرسال واتساب</button>
+        <button class="home-btn hidden" id="homeBtn" onclick="goToHome()">🏠 الرئيسية</button>
     </div>
 
     <script>
         // متغيرات النظام
         let currentInvoiceData = {};
         let itemsData = [];
+        let availableItems = []; // قائمة الأصناف المتاحة من Google Sheets
 
         // إعدادات Google Sheets
         const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1POl2ntUZL9x0n79Wr1_ZswEETSFUrgjMrXcFtDfoFqA/edit?gid=577520886#gid=577520886';
@@ -1596,9 +1664,13 @@
             const newRow = document.createElement('div');
             newRow.className = 'item-input-row';
             newRow.innerHTML = `
-                <input type="text" class="form-input" placeholder="اسم الصنف" required>
-                <input type="number" class="form-input" placeholder="الكمية" min="1" step="1" required>
-                <input type="number" class="form-input" placeholder="السعر" min="0" step="0.01" required>
+                <select class="form-input" required>
+                    <option value="">اختر الصنف...</option>
+                </select>
+                <div class="quantity-price-group">
+                    <input type="number" class="form-input" placeholder="الكمية" min="1" step="1" required>
+                    <input type="number" class="form-input" placeholder="السعر" min="0" step="0.01" required>
+                </div>
                 <div class="vat-checkbox-container">
                     <input type="checkbox" class="vat-checkbox" id="vatIncluded_${rowCount}" title="شامل الضريبة">
                     <label for="vatIncluded_${rowCount}" class="vat-checkbox-label">شامل الضريبة</label>
@@ -1606,6 +1678,9 @@
                 <button type="button" class="remove-item-btn" onclick="removeItemRow(this)">🗑️</button>
             `;
             container.appendChild(newRow);
+            
+            // ملء قائمة الأصناف للصف الجديد
+            populateItemSelect(newRow.querySelector('select'));
         }
 
         // حذف صف من الأصناف
@@ -1654,12 +1729,13 @@
             const globalVatRate = parseFloat(document.getElementById('vatRate').value) || 15;
             
             itemRows.forEach((row, index) => {
-                const inputs = row.querySelectorAll('.form-input');
+                const select = row.querySelector('select');
+                const quantityPriceInputs = row.querySelectorAll('.quantity-price-group .form-input');
                 const vatCheckbox = row.querySelector('.vat-checkbox');
                 
-                const name = inputs[0].value.trim();
-                const quantity = parseFloat(inputs[1].value) || 0;
-                let price = parseFloat(inputs[2].value) || 0;
+                const name = select ? select.value.trim() : ''; // اسم الصنف من القائمة المنسدلة
+                const quantity = parseFloat(quantityPriceInputs[0].value) || 0;
+                let price = parseFloat(quantityPriceInputs[1].value) || 0;
                 const isVatIncluded = vatCheckbox ? vatCheckbox.checked : false;
                 
                 if (name && quantity > 0 && price >= 0) {
@@ -1716,7 +1792,8 @@
             // التحقق من صحة النموذج
             const customerName = document.getElementById('customerName').value.trim();
             if (!customerName) {
-                alert('يرجى إدخال اسم العميل');
+                alert('يرجى اختيار العميل من القائمة');
+                document.getElementById('customerName').focus();
                 return;
             }
 
@@ -1766,6 +1843,8 @@
                 document.getElementById('invoiceContainer').classList.remove('hidden');
                 document.getElementById('printBtn').classList.remove('hidden');
                 document.getElementById('newInvoiceBtn').classList.remove('hidden');
+                document.getElementById('whatsappBtn').classList.remove('hidden');
+                document.getElementById('homeBtn').classList.remove('hidden');
             } else {
                 alert('فشل في إرسال البيانات إلى Google Sheets. يرجى المحاولة مرة أخرى.');
             }
@@ -1997,6 +2076,9 @@
             document.getElementById('vatRate').value = '15';
             document.getElementById('discountPercent').value = '0';
             
+            // إعادة تعيين قائمة العملاء
+            document.getElementById('customerName').selectedIndex = 0;
+            
             // توليد رقم فاتورة جديد
             const newInvoiceNumber = await generateNewInvoiceNumber();
             document.getElementById('invoiceNumber').value = newInvoiceNumber;
@@ -2005,9 +2087,13 @@
             const container = document.getElementById('itemsContainer');
             container.innerHTML = `
                 <div class="item-input-row">
-                    <input type="text" class="form-input" placeholder="اسم الصنف" required>
-                    <input type="number" class="form-input" placeholder="الكمية" min="1" step="1" required>
-                    <input type="number" class="form-input" placeholder="السعر" min="0" step="0.01" required>
+                    <select class="form-input" required>
+                        <option value="">اختر الصنف...</option>
+                    </select>
+                    <div class="quantity-price-group">
+                        <input type="number" class="form-input" placeholder="الكمية" min="1" step="1" required>
+                        <input type="number" class="form-input" placeholder="السعر" min="0" step="0.01" required>
+                    </div>
                     <div class="vat-checkbox-container">
                         <input type="checkbox" class="vat-checkbox" id="vatIncluded_new_1" title="شامل الضريبة">
                         <label for="vatIncluded_new_1" class="vat-checkbox-label">شامل الضريبة</label>
@@ -2016,15 +2102,353 @@
                 </div>
             `;
             
+            // ملء قائمة الأصناف للصف الأول
+            populateItemSelect(container.querySelector('select'));
+            
             // إخفاء الفاتورة وإظهار النموذج
             document.getElementById('invoiceContainer').classList.add('hidden');
             document.getElementById('inputForm').classList.remove('hidden');
             document.getElementById('printBtn').classList.add('hidden');
             document.getElementById('newInvoiceBtn').classList.add('hidden');
+            document.getElementById('whatsappBtn').classList.add('hidden');
             
             // مسح البيانات المحفوظة
             currentInvoiceData = {};
             itemsData = [];
+        }
+
+        // تحميل بيانات الأصناف من Google Sheets
+        async function loadItems() {
+            try {
+                console.log('🔄 بدء تحميل بيانات الأصناف من Google Sheets...');
+                
+                // رابط CSV مباشر للشيت - سنستخدم نفس الرابط ولكن لجلب العمود C
+                const ITEMS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1POl2ntUZL9x0n79Wr1_ZswEETSFUrgjMrXcFtDfoFqA/export?format=csv&gid=0';
+                
+                const response = await fetch(ITEMS_SHEET_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvData = await response.text();
+                console.log('📊 تم استلام بيانات الأصناف من Google Sheets');
+                
+                const lines = csvData.split('\n');
+                const uniqueItems = new Set(); // لتجنب التكرار
+                
+                lines.forEach((line, index) => {
+                    if (index === 0) return; // تخطي الرأس
+                    
+                    const columns = line.split(',');
+                    if (columns.length > 2) {
+                        // أخذ العمود الثالث (C) للأصناف
+                        let itemName = columns[2];
+                        
+                        if (itemName) {
+                            itemName = itemName.trim().replace(/"/g, '').replace(/'/g, '');
+                            
+                            if (itemName && itemName !== '' && itemName !== 'undefined' && itemName.length > 0) {
+                                uniqueItems.add(itemName);
+                            }
+                        }
+                    }
+                });
+                
+                // تحويل إلى مصفوفة مرتبة أبجدياً
+                availableItems = Array.from(uniqueItems).sort();
+                
+                console.log(`✅ تم تحميل ${availableItems.length} صنف من Google Sheets`);
+                console.log('📝 الأصناف المتاحة:', availableItems);
+                
+                // ملء جميع قوائم الأصناف الموجودة
+                const itemSelects = document.querySelectorAll('#itemsContainer select');
+                itemSelects.forEach(select => {
+                    populateItemSelect(select);
+                });
+                
+            } catch (error) {
+                console.error('❌ خطأ في تحميل بيانات الأصناف:', error);
+                
+                // إضافة بعض الأصناف الافتراضية في حالة الفشل
+                availableItems = [
+                    'دونات محشية سادة',
+                    'كوكيزدونات فانيليا',
+                    'دونات كراميل',
+                    'دونات فراولة',
+                    'كروسان سادة',
+                    'كروسان بالجبن',
+                    'مافن شوكولاتة',
+                    'كيك رد فيلفت'
+                ].sort();
+                
+                console.log('🔄 تم تحميل الأصناف الافتراضية');
+                
+                // ملء جميع قوائم الأصناف الموجودة
+                const itemSelects = document.querySelectorAll('#itemsContainer select');
+                itemSelects.forEach(select => {
+                    populateItemSelect(select);
+                });
+            }
+        }
+
+        // ملء قائمة منسدلة واحدة بالأصناف المتاحة
+        function populateItemSelect(selectElement) {
+            if (!selectElement || !availableItems) return;
+            
+            // مسح الخيارات الحالية والاحتفاظ بالخيار الأول
+            selectElement.innerHTML = '<option value="">اختر الصنف...</option>';
+            
+            // إضافة جميع الأصناف المتاحة
+            availableItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                selectElement.appendChild(option);
+            });
+        }
+
+        // إرسال رسالة واتساب للعميل
+        function sendWhatsAppMessage() {
+            if (!currentInvoiceData.invoiceNumber) {
+                alert('يرجى إنشاء الفاتورة أولاً');
+                return;
+            }
+
+            // التحقق من وجود رقم هاتف العميل
+            if (!window.currentCustomerPhone) {
+                alert('لا يوجد رقم هاتف محفوظ لهذا العميل');
+                return;
+            }
+
+            // تنسيق رقم الهاتف (إزالة المسافات والرموز الخاصة وإضافة كود البلد إذا لزم الأمر)
+            let phoneNumber = window.currentCustomerPhone.replace(/\D/g, ''); // إزالة كل شيء عدا الأرقام
+            
+            // إضافة كود المملكة العربية السعودية إذا لم يكن موجوداً
+            if (phoneNumber.startsWith('05')) {
+                phoneNumber = '966' + phoneNumber.substring(1); // تحويل 05xxxxxxxx إلى 9665xxxxxxxx
+            } else if (phoneNumber.startsWith('5') && phoneNumber.length === 9) {
+                phoneNumber = '966' + phoneNumber; // تحويل 5xxxxxxxx إلى 9665xxxxxxxx
+            } else if (!phoneNumber.startsWith('966')) {
+                phoneNumber = '966' + phoneNumber; // إضافة كود البلد
+            }
+
+            // إنشاء رسالة الواتساب
+            const message = `
+🎉 شكراً لك ${currentInvoiceData.customerName} لاختيارك دونات وحشوة! 
+
+📋 تفاصيل فاتورتك:
+🔢 رقم الفاتورة: ${currentInvoiceData.invoiceNumber}
+📅 التاريخ: ${currentInvoiceData.arabicDate}
+💰 المبلغ الإجمالي: ${currentInvoiceData.total} ر.س
+
+🍩 نتطلع لخدمتك مرة أخرى!
+🏪 دونات وحشوة - أفضل الحلويات الطازجة
+
+📍 مكة المكرمة - بطحاء قريش
+            `.trim();
+
+            // تشفير الرسالة للـ URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // إنشاء رابط الواتساب
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            
+            // فتح الواتساب
+            window.open(whatsappUrl, '_blank');
+            
+            console.log(`📱 تم فتح الواتساب للرقم: ${phoneNumber}`);
+            console.log(`💬 الرسالة المرسلة:`, message);
+        }
+
+        // الانتقال إلى الصفحة الرئيسية
+        function goToHome() {
+            // التأكد من المستخدم قبل الخروج
+            const confirmExit = confirm('هل تريد العودة إلى الصفحة الرئيسية؟\n\nملاحظة: سيتم فقدان أي بيانات غير محفوظة.');
+            
+            if (confirmExit) {
+                // الانتقال إلى index.html
+                window.location.href = 'index.html';
+            }
+        }
+
+        // تحميل بيانات العملاء من Google Sheets
+        async function loadCustomers() {
+            const customerSelect = document.getElementById('customerName');
+            
+            try {
+                console.log('🔄 بدء تحميل بيانات العملاء من Google Sheets...');
+                
+                // رابط CSV مباشر للشيت المشارك - صفحة Customer
+                const CUSTOMER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1POl2ntUZL9x0n79Wr1_ZswEETSFUrgjMrXcFtDfoFqA/export?format=csv&gid=0';
+                
+                const response = await fetch(CUSTOMER_SHEET_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvData = await response.text();
+                console.log('📊 تم استلام البيانات من Google Sheets');
+                console.log('📋 أول 200 حرف:', csvData.substring(0, 200) + '...');
+                
+                const lines = csvData.split('\n');
+                const uniqueCustomers = new Set(); // لتجنب التكرار
+                
+                // معالجة البيانات من CSV
+                const customersData = new Map(); // لحفظ بيانات العملاء مع العنوان والرقم الضريبي
+                
+                lines.forEach((line, index) => {
+                    if (index === 0) return; // تخطي الرأس
+                    
+                    const columns = line.split(',');
+                    if (columns.length > 1) {
+                        // أخذ العمود الثاني (B) للعميل، العمود الخامس (E) للرقم الضريبي، العمود السادس (F) للعنوان، والعمود السابع (G) لرقم الهاتف
+                        let customer = columns[1];
+                        let vatNumber = columns[4] || ''; // العمود E (index 4)
+                        let address = columns[5] || ''; // العمود F (index 5)
+                        let phoneNumber = columns[6] || ''; // العمود G (index 6)
+                        
+                        if (customer) {
+                            customer = customer.trim().replace(/"/g, '').replace(/'/g, '');
+                            vatNumber = vatNumber.trim().replace(/"/g, '').replace(/'/g, '');
+                            address = address.trim().replace(/"/g, '').replace(/'/g, '');
+                            phoneNumber = phoneNumber.trim().replace(/"/g, '').replace(/'/g, '');
+                            
+                            if (customer && customer !== '' && customer !== 'undefined' && customer.length > 0) {
+                                // حفظ اسم العميل مع الرقم الضريبي والعنوان ورقم الهاتف
+                                customersData.set(customer, {
+                                    vatNumber: vatNumber,
+                                    address: address,
+                                    phoneNumber: phoneNumber
+                                });
+                                uniqueCustomers.add(customer); // إضافة للمجموعة لتجنب التكرار
+                            }
+                        }
+                    }
+                });
+                
+                // مسح القائمة الحالية (الاحتفاظ بالخيار الأول فقط)
+                customerSelect.innerHTML = '<option value="">اختر العميل...</option>';
+                
+                // إضافة العملاء الفريدين مرتبين أبجدياً
+                const sortedCustomers = Array.from(uniqueCustomers).sort();
+                sortedCustomers.forEach(customer => {
+                    const option = document.createElement('option');
+                    option.value = customer;
+                    option.textContent = customer;
+                    
+                    // إضافة الرقم الضريبي والعنوان ورقم الهاتف كـ data attributes
+                    const customerData = customersData.get(customer);
+                    if (customerData) {
+                        if (customerData.vatNumber && customerData.vatNumber !== '') {
+                            option.setAttribute('data-vat-number', customerData.vatNumber);
+                        }
+                        if (customerData.address && customerData.address !== '') {
+                            option.setAttribute('data-address', customerData.address);
+                        }
+                        if (customerData.phoneNumber && customerData.phoneNumber !== '') {
+                            option.setAttribute('data-phone-number', customerData.phoneNumber);
+                        }
+                    }
+                    
+                    customerSelect.appendChild(option);
+                });
+                
+                console.log(`✅ تم تحميل ${sortedCustomers.length} عميل من Google Sheets`);
+                
+                if (sortedCustomers.length > 0) {
+                    // عرض رسالة نجاح مؤقتة
+                    const successMessage = document.createElement('div');
+                    successMessage.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #28a745;
+                        color: white;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        z-index: 1000;
+                        font-size: 14px;
+                    `;
+                    successMessage.textContent = `✅ تم تحميل ${sortedCustomers.length} عميل من قاعدة البيانات`;
+                    document.body.appendChild(successMessage);
+                    
+                    // إزالة الرسالة بعد 3 ثوان
+                    setTimeout(() => {
+                        document.body.removeChild(successMessage);
+                    }, 3000);
+                }
+                
+            } catch (error) {
+                console.error('❌ خطأ في تحميل بيانات العملاء:', error);
+                
+                // إضافة بعض العملاء الافتراضيين في حالة الفشل
+                const defaultCustomers = [
+                    'عميل نقدي',
+                    'محمد أحمد',
+                    'فاطمة علي',
+                    'عبدالله محمد',
+                    'نورا سعد'
+                ];
+                
+                // مسح القائمة وإضافة العملاء الافتراضيين
+                customerSelect.innerHTML = '<option value="">اختر العميل...</option>';
+                defaultCustomers.forEach(customer => {
+                    const option = document.createElement('option');
+                    option.value = customer;
+                    option.textContent = customer;
+                    customerSelect.appendChild(option);
+                });
+                
+                console.log('🔄 تم تحميل العملاء الافتراضيين');
+            }
+            
+            // إضافة مستمع لتحديث العنوان والرقم الضريبي ورقم الهاتف عند تغيير العميل
+            customerSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const customerAddressField = document.getElementById('customerAddress');
+                const customerVATField = document.getElementById('customerVAT');
+                
+                if (selectedOption && this.value !== '') {
+                    // حفظ رقم الهاتف للاستخدام لاحقاً
+                    if (selectedOption.hasAttribute('data-phone-number')) {
+                        const phoneNumber = selectedOption.getAttribute('data-phone-number');
+                        // حفظ رقم الهاتف في متغير عام للاستخدام في الواتساب
+                        window.currentCustomerPhone = phoneNumber;
+                        console.log(`✅ تم حفظ رقم هاتف العميل "${this.value}": ${phoneNumber}`);
+                    } else {
+                        window.currentCustomerPhone = null;
+                        console.log(`⚠️ لا يوجد رقم هاتف محفوظ للعميل "${this.value}"`);
+                    }
+                    
+                    // تحديث الرقم الضريبي من البيانات المحفوظة
+                    if (selectedOption.hasAttribute('data-vat-number')) {
+                        const vatNumber = selectedOption.getAttribute('data-vat-number');
+                        customerVATField.value = vatNumber;
+                        console.log(`✅ تم تحديث الرقم الضريبي للعميل "${this.value}": ${vatNumber}`);
+                    } else {
+                        customerVATField.value = '';
+                        console.log(`⚠️ لا يوجد رقم ضريبي محفوظ للعميل "${this.value}"`);
+                    }
+                    
+                    // تحديث العنوان من البيانات المحفوظة
+                    if (selectedOption.hasAttribute('data-address')) {
+                        const address = selectedOption.getAttribute('data-address');
+                        customerAddressField.value = address;
+                        console.log(`✅ تم تحديث العنوان للعميل "${this.value}": ${address}`);
+                    } else {
+                        customerAddressField.value = '';
+                        console.log(`⚠️ لا يوجد عنوان محفوظ للعميل "${this.value}"`);
+                    }
+                } else {
+                    // مسح الحقول إذا لم يتم اختيار عميل
+                    customerVATField.value = '';
+                    customerAddressField.value = '';
+                    window.currentCustomerPhone = null;
+                }
+            });
         }
 
         // تهيئة النظام عند تحميل الصفحة
@@ -2037,6 +2461,12 @@
             const invoiceNumberField = document.getElementById('invoiceNumber');
             invoiceNumberField.removeAttribute('readonly');
             invoiceNumberField.style.background = 'white';
+            
+            // تحميل بيانات العملاء والأصناف من Google Sheets
+            await Promise.all([
+                loadCustomers(),
+                loadItems()
+            ]);
             
             // التركيز على حقل اسم العميل
             document.getElementById('customerName').focus();
