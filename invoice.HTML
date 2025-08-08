@@ -857,7 +857,95 @@
         }
 
         .hidden {
+            display: none !important;
+        }
+
+        /* Loading Screen مع رسائل الاستغفار */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-overlay:not(.hidden) {
+            display: flex;
+        }
+
+        .loading-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #dd228f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .istighfar-text {
+            font-size: 16px;
+            color: #dd228f;
+            margin-bottom: 10px;
+            font-weight: 600;
+            opacity: 0;
+            animation: fadeInOut 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(10px); }
+            50% { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #dd228f, #ffb6bb);
+            border-radius: 3px;
+            width: 0%;
+            animation: fillProgress 5s ease-in-out infinite;
+        }
+
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
         }
 
         /* تحسينات إضافية للمحتوى المتجاوب */
@@ -1492,8 +1580,8 @@
         <div class="footer">
             <div class="footer-message">شكراً لاختياركم دونات وحشوة! - Thank you for choosing Donuts & Filling!</div>
             <div class="contact-info">
-                للتواصل: info@donuts.com | هاتف: +966 11 123 4567<br>
-                For Contact: info@donuts.com | Phone: +966 11 123 4567<br>
+                للتواصل: info@donuts.com | هاتف: +966 56 671 5604<br>
+                For Contact: info@donuts.com | Phone: +966 56 671 5604<br>
                 زورونا على مواقع التواصل الاجتماعي - Visit us on social media
             </div>
         </div>
@@ -1789,9 +1877,13 @@
 
         // إنشاء الفاتورة
         async function generateInvoice() {
+            // عرض Loading Screen مع رسائل الاستغفار
+            showLoadingScreen();
+            
             // التحقق من صحة النموذج
             const customerName = document.getElementById('customerName').value.trim();
             if (!customerName) {
+                hideLoadingScreen();
                 alert('يرجى اختيار العميل من القائمة');
                 document.getElementById('customerName').focus();
                 return;
@@ -1800,6 +1892,7 @@
             // جمع البيانات
             itemsData = collectItemsData();
             if (itemsData.length === 0) {
+                hideLoadingScreen();
                 alert('يرجى إضافة صنف واحد على الأقل');
                 return;
             }
@@ -1807,6 +1900,7 @@
             // استخدام رقم الفاتورة الحالي (المُعدل أو التلقائي)
             const invoiceNumber = document.getElementById('invoiceNumber').value.trim();
             if (!invoiceNumber) {
+                hideLoadingScreen();
                 alert('يرجى التأكد من رقم الفاتورة');
                 return;
             }
@@ -1838,6 +1932,9 @@
                 // تحديث الفاتورة
                 updateInvoiceDisplay();
                 
+                // إخفاء Loading Screen
+                hideLoadingScreen();
+                
                 // إخفاء النموذج وإظهار الفاتورة
                 document.getElementById('inputForm').classList.add('hidden');
                 document.getElementById('invoiceContainer').classList.remove('hidden');
@@ -1846,6 +1943,7 @@
                 document.getElementById('whatsappBtn').classList.remove('hidden');
                 document.getElementById('homeBtn').classList.remove('hidden');
             } else {
+                hideLoadingScreen();
                 alert('فشل في إرسال البيانات إلى Google Sheets. يرجى المحاولة مرة أخرى.');
             }
         }
@@ -2479,8 +2577,59 @@
             });
         }
 
+        // Loading Screen مع رسائل الاستغفار
+        function showLoadingScreen() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
+                loadingOverlay.style.display = 'flex';
+                
+                // مصفوفة رسائل الاستغفار
+                const istighfarMessages = [
+                    'أستغفر الله العظيم',
+                    'استغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه',
+                    'لا إله إلا أنت سبحانك إني كنت من الظالمين',
+                    'سبحان الله وبحمده سبحان الله العظيم',
+                    'اللهم صل وسلم على نبينا محمد',
+                    'لا حول ولا قوة إلا بالله',
+                    'حسبنا الله ونعم الوكيل',
+                    'اللهم أعني ولا تعن علي',
+                    'رب اغفر لي ذنبي وخطئي وجهلي',
+                    'اللهم بارك لنا فيما رزقتنا'
+                ];
+                
+                let currentMessageIndex = 0;
+                const istighfarText = document.getElementById('istighfarText');
+                
+                // تغيير الرسالة كل 2 ثانية
+                window.istighfarInterval = setInterval(() => {
+                    currentMessageIndex = (currentMessageIndex + 1) % istighfarMessages.length;
+                    if (istighfarText) {
+                        istighfarText.textContent = istighfarMessages[currentMessageIndex];
+                    }
+                }, 2000);
+            }
+        }
+
+        function hideLoadingScreen() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+                loadingOverlay.style.display = 'none';
+                
+                // إيقاف تغيير رسائل الاستغفار
+                if (window.istighfarInterval) {
+                    clearInterval(window.istighfarInterval);
+                    window.istighfarInterval = null;
+                }
+            }
+        }
+
         // تهيئة النظام عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', async function() {
+            // إخفاء Loading Screen فوراً عند تحميل الصفحة
+            hideLoadingScreen();
+            
             // توليد رقم فاتورة أولي
             const initialInvoiceNumber = await generateNewInvoiceNumber();
             document.getElementById('invoiceNumber').value = initialInvoiceNumber;
@@ -2506,5 +2655,17 @@
             });
         });
     </script>
+
+    <!-- Loading Screen مع رسائل الاستغفار -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">جاري إنشاء الفاتورة...</div>
+            <div class="istighfar-text" id="istighfarText">أستغفر الله العظيم</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
