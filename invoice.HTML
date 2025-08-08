@@ -1887,31 +1887,53 @@
             generateQRCode();
         }
 
-        // إنشاء QR Code وفقاً لمعايير ZATCA السعودية باستخدام API خارجي
+        // إنشاء QR Code وفقاً لمعايير ZATCA السعودية
         async function generateQRCode() {
             const data = currentInvoiceData;
             
             try {
-                // إنشاء مولد QR Code السعودي
-                const qrGenerator = new SaudiQRGenerator();
+                // إنشاء QR Code مشفر وفقاً لمعايير هيئة الزكاة والدخل والجمارك
+                // التشفير Base64 للبيانات المطلوبة حسب المعايير السعودية
                 
-                // تحضير بيانات الفاتورة للتشفير
-                const invoiceData = {
-                    sellerName: "دونات وحشوة",
-                    vatNumber: "301189158700003", // الرقم الضريبي الفعلي لشركة دونات وحشوة
-                    timestamp: data.timestamp,
-                    totalWithVAT: parseFloat(data.total),
-                    vatAmount: parseFloat(data.vat)
-                };
+                // البيانات المطلوبة لـ ZATCA QR Code
+                const sellerName = "دونات وحشوة";
+                const vatNumber = "301189158700003";
+                const timestamp = data.timestamp;
+                const totalWithVAT = parseFloat(data.total);
+                const vatAmount = parseFloat(data.vat);
                 
-                // إنشاء محتوى QR Code المشفر
-                const qrContent = qrGenerator.generateQRContent(invoiceData);
+                // تحويل البيانات إلى Base64 حسب معايير ZATCA
+                function toBase64(str) {
+                    return btoa(unescape(encodeURIComponent(str)));
+                }
                 
-                // تشفير البيانات للـ URL
-                const encodedQRContent = encodeURIComponent(qrContent);
+                // تكوين QR Code Tags حسب المعايير السعودية
+                const qrData = [
+                    { tag: 1, value: sellerName },
+                    { tag: 2, value: vatNumber },
+                    { tag: 3, value: timestamp },
+                    { tag: 4, value: totalWithVAT.toString() },
+                    { tag: 5, value: vatAmount.toString() }
+                ];
                 
-                // إنشاء رابط QR Code باستخدام API خارجي (حجم مناسب للطباعة الحرارية)
-                const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedQRContent}&margin=1&format=png&ecc=M`;
+                // تشفير البيانات بتنسيق TLV (Tag-Length-Value)
+                let qrContent = '';
+                qrData.forEach(item => {
+                    const tagHex = item.tag.toString(16).padStart(2, '0');
+                    const valueBytes = unescape(encodeURIComponent(item.value));
+                    const lengthHex = valueBytes.length.toString(16).padStart(2, '0');
+                    qrContent += String.fromCharCode(parseInt(tagHex, 16));
+                    qrContent += String.fromCharCode(parseInt(lengthHex, 16));
+                    qrContent += item.value;
+                });
+                
+                // تشفير النتيجة النهائية بـ Base64
+                const encodedQRContent = toBase64(qrContent);
+                
+                console.log('🔐 QR Data المشفرة:', encodedQRContent);
+                
+                // إنشاء رابط QR Code باستخدام API خارجي
+                const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(encodedQRContent)}&margin=1&format=png&ecc=M`;
                 
                 // إنشاء صورة QR Code
                 const qrImage = document.createElement('img');
@@ -1928,19 +1950,24 @@
                     const qrContainer = document.getElementById('qrCodeContent');
                     const qrPlaceholder = document.getElementById('qrCode');
                     
-                    qrContainer.style.display = 'none';
-                    qrPlaceholder.innerHTML = '';
-                    qrPlaceholder.appendChild(qrImage);
+                    if (qrContainer) {
+                        qrContainer.style.display = 'none';
+                    }
+                    
+                    if (qrPlaceholder) {
+                        qrPlaceholder.innerHTML = '';
+                        qrPlaceholder.appendChild(qrImage);
+                    }
                     
                     console.log('✅ QR Code ZATCA تم إنشاؤه بنجاح');
-                    console.log('🔗 QR Content:', qrContent);
+                    console.log('🔗 QR Content المشفر:', encodedQRContent);
                     console.log('🌐 QR URL:', qrImageUrl);
                 };
                 
                 // معالج في حالة فشل تحميل الصورة
                 qrImage.onerror = function() {
                     console.error('❌ فشل في تحميل QR Code من API');
-                    showQRFallback(data, qrContent);
+                    showQRFallback(data, encodedQRContent);
                 };
                 
             } catch (error) {
@@ -1952,16 +1979,20 @@
         // عرض البديل في حالة فشل QR Code
         function showQRFallback(data, qrContent) {
             const fallbackContent = `
-                <div style="font-size: 11px; line-height: 1.3; padding: 10px;">
+                <div style="font-size: 11px; line-height: 1.3; padding: 10px; text-align: center; border: 2px solid #dd228f; border-radius: 8px; background: #f8f9fa;">
                     <strong>${data.invoiceNumber}</strong><br>
                     <strong>دونات وحشوة</strong><br>
                     ${data.arabicDate}<br>
                     <strong>${data.total} ر.س</strong><br>
-                    <small style="color: #dd228f;">QR Code: ${qrContent ? 'تم التشفير' : 'غير متاح'}</small>
+                    <small style="color: #dd228f;">QR Code: ${qrContent ? 'تم إنشاء المحتوى' : 'غير متاح'}</small>
                 </div>
             `;
             
-            document.getElementById('qrCodeContent').innerHTML = fallbackContent;
+            const qrCodeContent = document.getElementById('qrCodeContent');
+            if (qrCodeContent) {
+                qrCodeContent.innerHTML = fallbackContent;
+                qrCodeContent.style.display = 'block';
+            }
         }
 
         // طباعة حرارية محسنة للورقة 57mm
@@ -2111,6 +2142,7 @@
             document.getElementById('printBtn').classList.add('hidden');
             document.getElementById('newInvoiceBtn').classList.add('hidden');
             document.getElementById('whatsappBtn').classList.add('hidden');
+            document.getElementById('homeBtn').classList.add('hidden');
             
             // مسح البيانات المحفوظة
             currentInvoiceData = {};
@@ -2387,10 +2419,6 @@
                 // إضافة بعض العملاء الافتراضيين في حالة الفشل
                 const defaultCustomers = [
                     'عميل نقدي',
-                    'محمد أحمد',
-                    'فاطمة علي',
-                    'عبدالله محمد',
-                    'نورا سعد'
                 ];
                 
                 // مسح القائمة وإضافة العملاء الافتراضيين
