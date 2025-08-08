@@ -1,191 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار الطباعة الحرارية - دونات وحشوة</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #f5f5f5;
-            direction: rtl;
-        }
-        
-        .test-container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .preview-area {
-            border: 2px dashed #dd228f;
-            padding: 10px;
-            margin: 20px 0;
-            background: white;
-            border-radius: 5px;
-        }
-        
-        .thermal-preview {
-            width: 57mm;
-            height: 290mm;
-            border: 1px solid #ccc;
-            margin: 10px auto;
-            background: white;
-            overflow: hidden;
-            transform: scale(0.5);
-            transform-origin: top center;
-        }
-        
-        button {
-            background: #dd228f;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-            width: 100%;
-        }
-        
-        button:hover {
-            background: #b91c6f;
-        }
-        
-        .info {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #2196f3;
-            margin: 15px 0;
-        }
-        
-        @media print {
-            @page {
-                size: 57mm 290mm;
-                margin: 2mm;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            
-            .test-container {
-                display: none;
-            }
-            
-            .thermal-preview {
-                display: block;
-                transform: none;
-                width: 100%;
-                height: 100%;
-                border: none;
-                margin: 0;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="test-container">
-        <h1>اختبار الطباعة الحرارية</h1>
-        <p><strong>مقاس الورقة:</strong> 57mm × 290mm</p>
-        
-        <div class="info">
-            <h3>📋 معلومات الطباعة الحرارية:</h3>
-            <ul>
-                <li><strong>العرض:</strong> 57 مليمتر</li>
-                <li><strong>الطول:</strong> 290 مليمتر</li>
-                <li><strong>الألوان:</strong> محفوظة ومطبوعة</li>
-                <li><strong>الدقة:</strong> محسنة للطباعة الحرارية</li>
-                <li><strong>QR Code:</strong> 75mm × 75mm مناسب للقراءة</li>
-            </ul>
-        </div>
-        
-        <button onclick="window.print()">طباعة اختبار</button>
-        <button onclick="window.location.href='invoice.HTML'">العودة للفاتورة</button>
-        
-        <div class="preview-area">
-            <h3>معاينة الطباعة (مصغرة 50%):</h3>
-            <div class="thermal-preview" id="thermalPreview">
-                <!-- محتوى تجريبي -->
-                <div style="background: linear-gradient(135deg, #dd228f, #ffb6bb); color: white; padding: 8px; text-align: center;">
-                    <div style="font-size: 12px; font-weight: bold;">دونات وحشوة</div>
-                    <div style="font-size: 7px;">متجر الحلويات والمخبوزات</div>
-                </div>
-                
-                <div style="background: #fff3cd; padding: 5px; font-size: 6px; text-align: center;">
-                    📋 فاتورة ضريبية مبسطة
-                    <br>301189158700003
-                    <br>مكة المكرمة - بطحاء قريش
-                </div>
-                
-                <div style="padding: 5px; font-size: 6px;">
-                    <div><strong>رقم الفاتورة:</strong> INV-202508-1234</div>
-                    <div><strong>التاريخ:</strong> 8 أغسطس 2025</div>
-                    <div><strong>العميل:</strong> عميل كريم</div>
-                </div>
-                
-                <table style="width: 100%; border-collapse: collapse; font-size: 6px;">
-                    <tr style="background: linear-gradient(135deg, #dd228f, #ffb6bb); color: white;">
-                        <th style="padding: 2px;">الصنف</th>
-                        <th style="padding: 2px;">الكمية</th>
-                        <th style="padding: 2px;">السعر</th>
-                    </tr>
-                    <tr>
-                        <td style="padding: 2px; text-align: center;">دونات شوكولاتة</td>
-                        <td style="padding: 2px; text-align: center;">2</td>
-                        <td style="padding: 2px; text-align: center;">50.00</td>
-                    </tr>
-                    <tr style="background: #f8f9fa;">
-                        <td style="padding: 2px; text-align: center;">دونات فراولة</td>
-                        <td style="padding: 2px; text-align: center;">1</td>
-                        <td style="padding: 2px; text-align: center;">25.00</td>
-                    </tr>
-                </table>
-                
-                <div style="background: linear-gradient(135deg, #ffbed4, #ffb6bb); padding: 5px; font-size: 7px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span>المجموع الفرعي:</span>
-                        <span>75.00 ر.س</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span>الضريبة (15%):</span>
-                        <span>11.25 ر.س</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #dd228f; padding-top: 2px; margin-top: 2px;">
-                        <span>المجموع النهائي:</span>
-                        <span>86.25 ر.س</span>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; margin: 5px 0;">
-                    <div style="width: 75px; height: 75px; border: 1px solid #dd228f; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 8px; background: white;">
-                        QR Code
-                        <br>ZATCA
-                    </div>
-                </div>
-                
-                <div style="background: #dd228f; color: white; padding: 5px; text-align: center; font-size: 5px;">
-                    شكراً لاختياركم دونات وحشوة!
-                    <br>متوافق مع معايير هيئة الزكاة والضريبة والجمارك
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        console.log('صفحة اختبار الطباعة الحرارية محملة');
-        
-        // تحديث المعاينة بالوقت الحالي
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const arabicDate = now.toLocaleDateString('ar-SA');
-            const time = now.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'});
-            
-            console.log('تم تحديث التاريخ والوقت في المعاينة');
-        });
-    </script>
-</body>
-</html>
