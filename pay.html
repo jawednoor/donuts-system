@@ -1183,7 +1183,7 @@
         // تأخير قصير ثم فتح صفحة الإيصال
         setTimeout(() => {
           const receiptUrl = `payment-receipt.html?customer=${encodeURIComponent(customer)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${amount}&paymentMethod=${encodeURIComponent(paymentMethod)}&mobile=${encodeURIComponent(mobile)}&notes=${encodeURIComponent(notes)}`;
-          window.open(receiptUrl, '_blank');
+          window.location.href = receiptUrl;
         }, 1000);
 
         // إعادة تعيين النموذج
