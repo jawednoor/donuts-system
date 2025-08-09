@@ -460,8 +460,8 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvSfmuCxHMhrYigSo0j
 // معلومات الشركة للفواتير
 const COMPANY_INFO = {
     name: 'دونات وحشوة',
-    vatNumber: '123456789012345',
-    address: 'الرياض، المملكة العربية السعودية'
+    vatNumber: '301189158700003',
+    address: 'المملكة العربية السعودية، مكة المكرمة، بطجاء قريش، شارع أبي بن كعب، 21955'
 };
 ```
 
