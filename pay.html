@@ -1171,33 +1171,20 @@
         // إظهار إشعار نجاح بدلاً من alert
         showNotification('✅ تم تسجيل الدفعة بنجاح في Google Sheets!', 'success');
 
-        // بعد نجاح التسجيل، توليد رابط واتساب
-        const phone = '966' + mobile.slice(1);
-        const message = `🔔 تأكيد دفعة مالية جديدة\n\n` +
-                       `👤 العميل: *${customer}*\n` +
-                       `📅 التاريخ: *${date}*\n` +
-                       `💰 المبلغ: *${amount}* ريال\n` +
-                       `📄 رقم الفاتورة: *${invoiceNumber}*\n` +
-                       `💳 طريقة الدفع: *${paymentMethod}*\n` +
-                       `📝 ملاحظات: *${notes || 'لا توجد'}*\n\n` +
-                       `تم التسجيل في سجلاتنا ... وشكرا لكم 🙏\n` +
-                       `دونات وحشوة 🍩`;
+        // حفظ بيانات الإيصال في localStorage
+        localStorage.setItem('lastReceiptNumber', generateReceiptNumber());
+        localStorage.setItem('lastCustomer', customer);
+        localStorage.setItem('lastInvoiceNumber', invoiceNumber);
+        localStorage.setItem('lastAmount', amount);
+        localStorage.setItem('lastPaymentMethod', paymentMethod);
+        localStorage.setItem('lastMobile', mobile);
+        localStorage.setItem('lastNotes', notes);
 
-        // استخدام رابط واتساب المحسن
-        const waLink = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-        
-        console.log('فتح رابط واتساب:', waLink);
-        
-        // إظهار رابط واتساب
-        const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-        
-        document.getElementById('whatsappUrl').href = whatsappUrl;
-        document.getElementById('whatsappLink').style.display = 'block';
-        
-        // إضافة تأخير صغير قبل فتح واتساب
+        // تأخير قصير ثم فتح صفحة الإيصال
         setTimeout(() => {
-          window.open(whatsappUrl, '_blank');
-        }, 500);
+          const receiptUrl = `payment-receipt.html?customer=${encodeURIComponent(customer)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${amount}&paymentMethod=${encodeURIComponent(paymentMethod)}&mobile=${encodeURIComponent(mobile)}&notes=${encodeURIComponent(notes)}`;
+          window.open(receiptUrl, '_blank');
+        }, 1000);
 
         // إعادة تعيين النموذج
         document.getElementById('supplyForm').reset();
@@ -1238,6 +1225,16 @@
         document.getElementById('date').valueAsDate = new Date();
       });
     });
+
+    // دالة لتوليد رقم إيصال فريد
+    function generateReceiptNumber() {
+      const now = new Date();
+      const year = now.getFullYear().toString().substr(-2);
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const day = now.getDate().toString().padStart(2, '0');
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      return `R${year}${month}${day}${random}`;
+    }
   </script>
 
   <!-- Loading Screen مع رسائل الاستغفار -->

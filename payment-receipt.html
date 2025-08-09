@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إيصال الدفع - دونات وحشوة</title>
+    <link rel="icon" type="image/png" href="logo-01.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(220, 33, 142, 0.3);
+            border: 2px solid #dc218e;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #dc218e, #ffb6bb);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            border-bottom: 3px solid #b01e75;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.2)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.15)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.4;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            background: white;
+            padding: 15px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        .receipt-content {
+            padding: 2.5rem;
+            background: linear-gradient(135deg, #ffeee6 0%, #ffffff 100%);
+        }
+
+        .receipt-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #ffeee6 0%, #ffb6bb 20%);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid #ffb6bb;
+            box-shadow: 0 8px 20px rgba(220, 33, 142, 0.1);
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #ffb6bb;
+            box-shadow: 0 4px 10px rgba(220, 33, 142, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(220, 33, 142, 0.2);
+            border-color: #dc218e;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #dc218e;
+            font-size: 1rem;
+        }
+
+        .info-value {
+            color: #b01e75;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .amount-section {
+            background: linear-gradient(135deg, #dc218e, #ffb6bb);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 25px;
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #b01e75;
+            box-shadow: 0 15px 30px rgba(220, 33, 142, 0.3);
+        }
+
+        .amount-section::before {
+            content: '💰';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            font-size: 120px;
+            opacity: 0.15;
+        }
+
+        .amount-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="money" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="2" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23money)"/></svg>');
+            opacity: 0.2;
+        }
+
+        .amount-label {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .amount-value {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .currency {
+            font-size: 1.8rem;
+            margin-right: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2.5rem;
+        }
+
+        .btn {
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            min-width: 180px;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border: 2px solid transparent;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #dc218e, #ffb6bb);
+            border-color: #b01e75;
+        }
+
+        .btn-print:hover {
+            background: linear-gradient(135deg, #ffb6bb, #dc218e);
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border-color: #0d7377;
+        }
+
+        .btn-whatsapp:hover {
+            background: linear-gradient(135deg, #128C7E, #0d7377);
+        }
+
+        .btn-home {
+            background: linear-gradient(135deg, #dc218e, #b01e75);
+            border-color: #8e1a5c;
+        }
+
+        .btn-home:hover {
+            background: linear-gradient(135deg, #b01e75, #8e1a5c);
+        }
+
+        .btn-close {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            border-color: #b71c1c;
+        }
+
+        .btn-close:hover {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        }
+
+        .thermal-receipt {
+            display: none;
+            width: 57mm;
+            height: 150mm;
+            padding: 5mm;
+            font-family: 'Cairo', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.3;
+            color: black;
+            background: white;
+            border: 1px solid #ddd;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .thermal-header {
+            text-align: center;
+            margin-bottom: 4mm;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 4mm;
+        }
+
+        .thermal-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 2mm;
+        }
+
+        .thermal-subtitle {
+            font-size: 12px;
+            margin-bottom: 2mm;
+        }
+
+        .thermal-content {
+            margin: 4mm 0;
+        }
+
+        .thermal-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2mm 0;
+            font-size: 11px;
+        }
+
+        .thermal-amount {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 6mm 0;
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding: 3mm 0;
+        }
+
+        .thermal-footer {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 4mm;
+            border-top: 1px dashed #000;
+            padding-top: 3mm;
+        }
+
+        @media print {
+            * {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            body * {
+                visibility: hidden;
+            }
+            
+            .thermal-receipt, .thermal-receipt * {
+                visibility: visible;
+            }
+            
+            .thermal-receipt {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 57mm !important;
+                height: 150mm !important;
+                display: block !important;
+                margin: 0 !important;
+                padding: 5mm !important;
+                border: none !important;
+                background: white !important;
+                page-break-after: avoid !important;
+            }
+            
+            @page {
+                size: 57mm 150mm;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .receipt-info {
+                grid-template-columns: 1fr;
+            }
+            .actions {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .success-animation {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #dc218e, #ffb6bb);
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.6s ease-in-out, pulse 2s infinite;
+            box-shadow: 0 10px 25px rgba(220, 33, 142, 0.4);
+            border: 3px solid #b01e75;
+        }
+
+        .checkmark::after {
+            content: '✓';
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 10px 25px rgba(220, 33, 142, 0.4);
+            }
+            50% {
+                box-shadow: 0 15px 35px rgba(220, 33, 142, 0.6);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #dc218e, #ffb6bb);
+            color: white;
+            padding: 1.2rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(220, 33, 142, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            border: 2px solid #b01e75;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.hide {
+            transform: translateX(400px);
+        }
+
+        #notesSection {
+            margin-top: 2rem;
+        }
+
+        #notesSection h3 {
+            margin-bottom: 1rem; 
+            color: #dc218e;
+            font-size: 1.3rem;
+        }
+
+        #notesSection div {
+            background: linear-gradient(135deg, #ffeee6 0%, #ffb6bb 20%);
+            padding: 1.5rem; 
+            border-radius: 15px; 
+            border-right: 6px solid #dc218e;
+            border: 2px solid #ffb6bb;
+            box-shadow: 0 4px 10px rgba(220, 33, 142, 0.1);
+        }
+
+        #notesSection p {
+            color: #b01e75;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="logo-01.png" alt="شعار دونات وحشوة">
+            </div>
+            <h1>إيصال الدفع</h1>
+            <p class="subtitle">دونات وحشوة - إيصال استلام مبلغ</p>
+        </div>
+
+        <div class="receipt-content">
+            <div class="success-animation">
+                <div class="checkmark"></div>
+                <h2 style="color: #dc218e; font-size: 1.8rem; margin-bottom: 0.5rem;">تم استلام المبلغ بنجاح</h2>
+            </div>
+
+            <div class="receipt-info">
+                <div class="info-item">
+                    <span class="info-label">رقم الإيصال:</span>
+                    <span class="info-value" id="receiptNumber">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">التاريخ والوقت:</span>
+                    <span class="info-value" id="receiptDate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">اسم العميل:</span>
+                    <span class="info-value" id="customerName">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">رقم الفاتورة:</span>
+                    <span class="info-value" id="invoiceNumber">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">طريقة الدفع:</span>
+                    <span class="info-value" id="paymentMethod">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">رقم الجوال:</span>
+                    <span class="info-value" id="mobileNumber">-</span>
+                </div>
+            </div>
+
+            <div class="amount-section">
+                <div class="amount-label">المبلغ المستلم</div>
+                <div class="amount-value">
+                    <span class="currency">ريال</span>
+                    <span id="amountValue">0</span>
+                </div>
+            </div>
+
+            <div id="notesSection" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: #495057;">ملاحظات:</h3>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; border-right: 4px solid #4CAF50;">
+                    <p id="notesContent"></p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-print" onclick="printThermalReceipt()">
+                    🖨️ طباعة حرارية
+                </button>
+                <button class="btn btn-whatsapp" onclick="sendWhatsApp()">
+                    📱 إرسال واتساب
+                </button>
+                <a href="index.html" class="btn btn-home">
+                    🏠 الرئيسية
+                </a>
+                <button class="btn btn-close" onclick="window.close()">
+                    ❌ خروج
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- إيصال الطباعة الحرارية -->
+    <div class="thermal-receipt" id="thermalReceipt">
+        <div class="thermal-header">
+            <div class="thermal-title">دونات وحشوة</div>
+            <div class="thermal-subtitle">إيصال دفع</div>
+        </div>
+        
+        <div class="thermal-content">
+            <div class="thermal-row">
+                <span>رقم:</span>
+                <span id="thermalReceiptNumber"></span>
+            </div>
+            <div class="thermal-row">
+                <span>العميل:</span>
+                <span id="thermalCustomer"></span>
+            </div>
+            <div class="thermal-row">
+                <span>فاتورة:</span>
+                <span id="thermalInvoice"></span>
+            </div>
+            <div class="thermal-row">
+                <span>الدفع:</span>
+                <span id="thermalPaymentMethod"></span>
+            </div>
+        </div>
+
+        <div class="thermal-amount">
+            <span id="thermalAmount"></span> ريال
+        </div>
+
+        <div class="thermal-footer">
+            <div>شكراً لك</div>
+            <div id="thermalTimestamp"></div>
+        </div>
+    </div>
+
+    <!-- إشعار النجاح -->
+    <div class="notification" id="notification">
+        <span>✅</span>
+        <span id="notificationText">تم بنجاح</span>
+    </div>
+
+    <script>
+        // متغيرات البيانات
+        let receiptData = {};
+
+        // تحميل البيانات عند فتح الصفحة
+        window.onload = function() {
+            loadReceiptData();
+        };
+
+        function loadReceiptData() {
+            // الحصول على البيانات من localStorage أو URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            receiptData = {
+                receiptNumber: urlParams.get('receiptNumber') || localStorage.getItem('lastReceiptNumber') || generateReceiptNumber(),
+                customer: urlParams.get('customer') || localStorage.getItem('lastCustomer') || 'عميل',
+                invoiceNumber: urlParams.get('invoiceNumber') || localStorage.getItem('lastInvoiceNumber') || '001',
+                amount: parseFloat(urlParams.get('amount') || localStorage.getItem('lastAmount') || '0'),
+                paymentMethod: urlParams.get('paymentMethod') || localStorage.getItem('lastPaymentMethod') || 'كاش',
+                mobile: urlParams.get('mobile') || localStorage.getItem('lastMobile') || '',
+                notes: urlParams.get('notes') || localStorage.getItem('lastNotes') || '',
+                date: new Date().toLocaleString('ar-SA')
+            };
+
+            displayReceiptData();
+        }
+
+        function generateReceiptNumber() {
+            const now = new Date();
+            const year = now.getFullYear().toString().substr(-2);
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `R${year}${month}${day}${random}`;
+        }
+
+        function displayReceiptData() {
+            // عرض البيانات في الصفحة الرئيسية
+            document.getElementById('receiptNumber').textContent = receiptData.receiptNumber;
+            document.getElementById('receiptDate').textContent = receiptData.date;
+            document.getElementById('customerName').textContent = receiptData.customer;
+            document.getElementById('invoiceNumber').textContent = receiptData.invoiceNumber;
+            document.getElementById('paymentMethod').textContent = receiptData.paymentMethod;
+            document.getElementById('mobileNumber').textContent = receiptData.mobile || 'غير محدد';
+            document.getElementById('amountValue').textContent = receiptData.amount.toFixed(2);
+
+            // عرض الملاحظات إذا كانت موجودة
+            if (receiptData.notes) {
+                document.getElementById('notesSection').style.display = 'block';
+                document.getElementById('notesContent').textContent = receiptData.notes;
+            }
+
+            // عرض البيانات في الإيصال الحراري
+            document.getElementById('thermalReceiptNumber').textContent = receiptData.receiptNumber;
+            document.getElementById('thermalCustomer').textContent = receiptData.customer;
+            document.getElementById('thermalInvoice').textContent = receiptData.invoiceNumber;
+            document.getElementById('thermalPaymentMethod').textContent = receiptData.paymentMethod;
+            document.getElementById('thermalAmount').textContent = receiptData.amount.toFixed(2);
+            document.getElementById('thermalTimestamp').textContent = new Date().toLocaleTimeString('ar-SA', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function printThermalReceipt() {
+            showNotification('جاري تحضير الطباعة...');
+            
+            // إظهار الإيصال الحراري للطباعة
+            document.getElementById('thermalReceipt').style.display = 'block';
+            
+            setTimeout(() => {
+                window.print();
+                document.getElementById('thermalReceipt').style.display = 'none';
+                showNotification('تم إرسال الإيصال للطابعة!');
+            }, 500);
+        }
+
+        function sendWhatsApp() {
+            if (!receiptData.mobile) {
+                showNotification('رقم الجوال غير متوفر', 'error');
+                return;
+            }
+
+            const message = `🧾 *إيصال الدفع - دونات وحشوة*
+
+📋 رقم الإيصال: ${receiptData.receiptNumber}
+📅 التاريخ: ${receiptData.date}
+👤 العميل: ${receiptData.customer}
+🧾 رقم الفاتورة: ${receiptData.invoiceNumber}
+💰 المبلغ: ${receiptData.amount.toFixed(2)} ريال
+💳 طريقة الدفع: ${receiptData.paymentMethod}
+📱 الجوال: ${receiptData.mobile}
+${receiptData.notes ? `📝 ملاحظات: ${receiptData.notes}` : ''}
+
+✅ تم استلام المبلغ بنجاح
+🙏 شكراً لثقتكم بنا
+
+*دونات وحشوة*`;
+
+            const phoneNumber = receiptData.mobile.replace(/[^0-9]/g, '');
+            const formattedPhone = phoneNumber.startsWith('966') ? phoneNumber : '966' + phoneNumber.substring(1);
+            const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+            
+            window.open(whatsappUrl, '_blank');
+            showNotification('تم فتح واتساب لإرسال الإيصال');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.className = `notification ${type === 'error' ? 'error' : 'success'}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+            }, 3000);
+
+            setTimeout(() => {
+                notification.classList.remove('hide');
+            }, 3300);
+        }
+
+        // منع إغلاق الصفحة بالخطأ
+        window.addEventListener('beforeunload', function(e) {
+            const confirmationMessage = 'هل أنت متأكد من إغلاق الإيصال؟';
+            e.returnValue = confirmationMessage;
+            return confirmationMessage;
+        });
+    </script>
+</body>
+</html>
